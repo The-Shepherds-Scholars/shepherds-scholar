@@ -1,0 +1,24 @@
+.nav { position: sticky; top: 0; z-index: 20; color: #fff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12); }
+.nav-bar { position: relative; overflow: hidden; }
+.nav-row {
+  position: relative; max-width: 1120px; margin: 0 auto; padding: 12px 24px;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px;
+}
+.nav-logo {
+  font-family: var(--font-display); font-weight: 700; font-size: clamp(19px, 4.6vw, 22px);
+  color: #fff; text-decoration: none; white-space: nowrap;
+}
+.nav-actions { display: flex; align-items: center; gap: 12px; }
+.nav-badge {
+  font-size: 14px; padding: 4px 10px; border: 1px solid rgba(255, 255, 255, 0.75); border-radius: 999px;
+}
+.nav-toggle {
+  width: 48px; height: 48px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.08); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.nav-menu { background: #fff; border-top: 1px solid rgba(0, 0, 0, 0.08); }
+.nav-menu-grid {
+  max-width: 1120px; margin: 0 auto; padding: 12px 24px 20px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 4px 24px;
+}
+.nav-link { padding: 12px 0; font-size: 19px; color: #1b2230; text-decoration: none; border-bottom: 1px solid rgba(0, 0, 0, 0.08); }

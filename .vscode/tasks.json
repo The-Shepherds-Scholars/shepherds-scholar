@@ -1,0 +1,152 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Database: start",
+      "type": "shell",
+      "command": "docker compose up -d",
+      "problemMatcher": []
+    },
+    {
+      "label": "Database: stop",
+      "type": "shell",
+      "command": "docker compose down",
+      "problemMatcher": []
+    },
+    {
+      "label": "Database: create test database (once)",
+      "type": "shell",
+      "command": "docker compose exec db createdb -U postgres shepherds_scholar_test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Backend: set up (first time)",
+      "type": "shell",
+      "command": "python3 -m venv .venv && .venv/bin/pip install -e '.[dev]' && cp -n .env.example .env || true",
+      "windows": {
+        "command": "python -m venv .venv; .venv\\Scripts\\pip install -e '.[dev]'; if (!(Test-Path .env)) { Copy-Item .env.example .env }"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Backend: migrate database",
+      "type": "shell",
+      "command": ".venv/bin/alembic upgrade head",
+      "windows": {
+        "command": ".venv\\Scripts\\alembic upgrade head"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Backend: import Douay-Rheims (once)",
+      "type": "shell",
+      "command": "curl -o data/DRC.json https://raw.githubusercontent.com/scrollmapper/bible_databases/master/formats/json/DRC.json && .venv/bin/python -m scripts.import_douay_rheims data/DRC.json",
+      "windows": {
+        "command": "curl.exe -o data/DRC.json https://raw.githubusercontent.com/scrollmapper/bible_databases/master/formats/json/DRC.json; .venv\\Scripts\\python -m scripts.import_douay_rheims data/DRC.json"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Backend: run API",
+      "type": "shell",
+      "command": ".venv/bin/uvicorn app.main:app --reload --port 8000",
+      "windows": {
+        "command": ".venv\\Scripts\\uvicorn app.main:app --reload --port 8000"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "uvicorn",
+        "pattern": {
+          "regexp": "^__never__$"
+        },
+        "background": {
+          "activesBegins": true,
+          "beginsPattern": "Will watch for changes|Started reloader",
+          "endsPattern": "Application startup complete"
+        }
+      }
+    },
+    {
+      "label": "Backend: run tests",
+      "type": "shell",
+      "command": ".venv/bin/pytest -q",
+      "windows": {
+        "command": ".venv\\Scripts\\pytest -q"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}/backend"
+      },
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Frontend: set up (first time)",
+      "type": "shell",
+      "command": "npm install && cp -n .env.example .env || true",
+      "windows": {
+        "command": "npm install; if (!(Test-Path .env)) { Copy-Item .env.example .env }"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}/frontend"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Frontend: dev server",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend"
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "vite",
+        "pattern": {
+          "regexp": "^__never__$"
+        },
+        "background": {
+          "activesBegins": true,
+          "beginsPattern": "VITE",
+          "endsPattern": "Local:"
+        }
+      }
+    },
+    {
+      "label": "Frontend: type-check",
+      "type": "shell",
+      "command": "npm run typecheck",
+      "options": {
+        "cwd": "${workspaceFolder}/frontend"
+      },
+      "problemMatcher": [
+        "$tsc"
+      ]
+    },
+    {
+      "label": "Dev: start everything",
+      "dependsOn": [
+        "Database: start",
+        "Backend: run API",
+        "Frontend: dev server"
+      ],
+      "dependsOrder": "sequence",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "recommendations": [
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "ms-python.debugpy",
+    "charliermarsh.ruff",
+    "esbenp.prettier-vscode",
+    "ms-azuretools.vscode-docker",
+    "mtxr.sqltools",
+    "mtxr.sqltools-driver-pg",
+    "googlecloudtools.cloudcode",
+    "anthropic.claude-code"
+  ]
+}

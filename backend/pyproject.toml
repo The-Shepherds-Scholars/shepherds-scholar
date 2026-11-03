@@ -1,0 +1,28 @@
+[project]
+name = "shepherds-scholar-backend"
+version = "0.2.0"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi",
+  "uvicorn[standard]",
+  "sqlalchemy>=2.0",
+  "psycopg[binary]",
+  "alembic",
+  "pydantic-settings",
+  "httpx",
+  "catholic-mass-readings",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["app*", "scripts*"]

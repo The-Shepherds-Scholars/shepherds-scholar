@@ -1,0 +1,40 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "API: debug FastAPI",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": ["app.main:app", "--reload", "--port", "8000"],
+      "cwd": "${workspaceFolder}/backend",
+      "envFile": "${workspaceFolder}/backend/.env",
+      "jinja": false,
+      "justMyCode": true
+    },
+    {
+      "name": "Tests: debug backend",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": ["-q"],
+      "cwd": "${workspaceFolder}/backend",
+      "justMyCode": false
+    },
+    {
+      "name": "Frontend: open in Chrome",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/frontend/src",
+      "preLaunchTask": "Frontend: dev server"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Full stack: API + site",
+      "configurations": ["API: debug FastAPI", "Frontend: open in Chrome"],
+      "stopAll": true
+    }
+  ]
+}

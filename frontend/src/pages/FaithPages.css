@@ -1,0 +1,86 @@
+/* Shared layout for the Miracles and Angels pages. Colors come from the route theme
+   (--accent, --ground) plus a few page-specific tokens set on each page's <main>. */
+.fp { max-width: 1040px; }
+.fp h1 { margin: 0; font-size: 44px; line-height: 1.1; }
+.fp .lead { margin: 14px 0 0; }
+.fp-section { margin-top: 56px; }
+.fp-section > h2 { margin: 0 0 8px; font-size: 32px; }
+.fp-intro { margin: 0 0 22px; max-width: 64ch; color: var(--fp-muted); }
+.fp-note { margin: 14px 0 0; max-width: 64ch; color: var(--fp-muted); }
+.fp-card {
+  background: var(--surface);
+  border: 1px solid var(--fp-line);
+  border-radius: 12px;
+  padding: 20px 22px;
+}
+.fp-card h3 { margin: 0 0 6px; font-size: 20px; }
+.fp-card p { margin: 0; color: var(--fp-body); }
+.fp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.fp-stack { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.fp-stack > * { margin: 0; }
+.fp-small { font-size: 15px; color: var(--fp-muted); }
+.fp-dark {
+  margin-top: 56px;
+  background: var(--fp-dark);
+  color: var(--fp-on-dark);
+  border-radius: 12px;
+  padding: 28px 32px;
+}
+.fp-dark h2 { margin: 0 0 12px; font-size: 28px; color: #fff; }
+.fp-dark p { margin: 0; max-width: 64ch; }
+.fp-dark p + p { margin-top: 14px; }
+.fp-draft {
+  margin: 40px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--fp-line);
+  font-size: 15px;
+  color: var(--fp-muted);
+}
+
+/* Miracles */
+.fp-feature { margin-top: 36px; border-top: 3px solid var(--accent); padding: 24px 28px; }
+.fp-feature h2 { margin: 0 0 8px; font-size: 22px; font-family: var(--font-body); }
+.fp-feature a { display: inline-flex; align-items: center; min-height: 44px; margin-top: 12px; font-weight: 500; }
+.fp-statuses { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 10px; }
+.fp-status {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  color: var(--fp-accent-dark);
+}
+.fp-status--investigating { border-style: dashed; }
+.fp-status--not-recognized { border-color: #6b6064; color: #4a4145; }
+.fp-status--small { padding: 4px 10px; border-radius: 6px; font-size: 15px; margin-top: 12px; }
+.fp-records { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.fp-record { padding: 22px 24px; }
+.fp-kind { margin: 0; font-size: 14px; font-weight: 700; color: var(--accent); }
+.fp-record h3 { margin: 4px 0 0; font-size: 22px; }
+.fp-record .fp-place { margin-top: 6px; color: var(--fp-muted); }
+.fp-record .fp-summary { margin-top: 14px; }
+.fp-record .fp-small { margin-top: 10px; }
+
+/* Angels */
+.fp-angels h1 { display: inline-block; padding-bottom: 12px; border-bottom: 3px solid var(--fp-red); }
+.fp-angels .lead { margin-top: 18px; }
+.fp-angels .fp-dark { margin-top: 32px; }
+.fp-angels .fp-dark h2 { font-size: 26px; }
+.fp-archangel { border-top: 3px solid var(--fp-steel); }
+.fp-archangel--michael { border-top-color: var(--fp-red); }
+.fp-archangel h3 { font-size: 22px; margin: 0; }
+.fp-archangel p { margin-top: 6px; }
+.fp-archangel .fp-small { margin-top: 10px; }
+.fp-cite { color: var(--fp-muted); }
+.fp-terms dt { font-weight: 700; font-size: 20px; }
+.fp-terms dd { margin: 4px 0 0; color: var(--fp-body); }
+.fp-terms .fp-rarest { border-left: 4px solid var(--fp-red); }
+.fp-history li { display: grid; grid-template-columns: 120px 1fr; gap: 16px; padding: 16px 20px; }
+.fp-history strong { color: var(--fp-red); }
+.fp-help h2 { margin: 0 0 8px; font-size: 22px; font-family: var(--font-body); }
+
+@media (max-width: 600px) {
+  .fp h1 { font-size: 36px; }
+  .fp-history li { grid-template-columns: 1fr; gap: 4px; }
+  .fp-dark, .fp-feature { padding: 22px 20px; }
+}

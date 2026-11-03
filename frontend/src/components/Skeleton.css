@@ -1,0 +1,7 @@
+.skel {
+  background: linear-gradient(90deg, #e4e7e4 0%, #f0f2f0 50%, #e4e7e4 100%);
+  background-size: 200% 100%;
+  animation: skel 1.4s ease-in-out infinite;
+}
+@keyframes skel { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .skel { animation: none; } }
