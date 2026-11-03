@@ -1,4 +1,5 @@
-# The Shepherd’s Scholar
+
+ n# The Shepherd’s Scholar
 
 Catholic faith and biblical history, side by side, with every statement labeled.
 
