@@ -1,7 +1,8 @@
-name: Daily readings
+name: Daily jobs
 
-# Fetches today's Mass readings (plus the week ahead) into Neon.
-# Free on GitHub Actions. Needs the repository secret NEON_DATABASE_URL.
+# 1. Fetches today's Mass readings (plus the week ahead) into Neon.
+# 2. Refreshes the API.Bible passage cache (skipped until API_BIBLE_KEY is set).
+# Free on GitHub Actions. Secrets: NEON_DATABASE_URL (required), API_BIBLE_KEY (optional).
 on:
   schedule:
     - cron: "0 10 * * *"   # 10:00 UTC = 5 a.m. New York in winter, 6 a.m. in summer
@@ -41,3 +42,15 @@ jobs:
             exit 1
           fi
           python -m app.jobs.fetch_daily_readings
+
+      - name: Refresh API.Bible passage cache
+        if: ${{ always() }}   # run even if the readings step failed
+        env:
+          NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+          API_BIBLE_KEY: ${{ secrets.API_BIBLE_KEY }}
+        run: |
+          if [ -z "$API_BIBLE_KEY" ]; then
+            echo "::notice::Skipped: add the API_BIBLE_KEY secret to refresh the passage cache."
+            exit 0
+          fi
+          python -m app.jobs.refresh_passage_cache
