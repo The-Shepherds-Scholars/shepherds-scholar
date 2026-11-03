@@ -1,9 +1,14 @@
+import type { ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
+import ScholarDefinition from '../components/ScholarDefinition';
 import Skeleton from '../components/Skeleton';
 import { apiGet } from '../lib/api';
 
-// Wireframe 11. The Bible translations section carries the full citation that
-// API.Bible's Acceptable Use requires for each copyrighted translation.
+// Sources and APIs, styled after the design concept (page 13) and wireframe 11.
+// Static list in v1 (later GET /api/v1/sources?type=dataset). Rows marked `planned` are in the concept
+// but not used by the site yet; they say so until the map and timeline use them.
+// The Bible translations section carries the full citation API.Bible's Acceptable Use requires.
 interface Translation {
   code: string;
   name: string;
@@ -14,6 +19,19 @@ interface Translation {
   citation: string | null;
 }
 
+const SOURCES: Array<{ name: string; url: string; provides: ReactNode; license: string; planned?: boolean }> = [
+  { name: 'Douay-Rheims Bible, Challoner revision', url: 'https://github.com/scrollmapper/bible_databases', provides: <>The Scripture text, all 73 books, including the <ScholarDefinition term="deuterocanonical">deuterocanonical</ScholarDefinition> ones</>, license: 'Public domain' },
+  { name: 'USCCB daily readings', url: 'https://bible.usccb.org/daily-bible-reading', provides: <>The day’s <ScholarDefinition term="mass">Mass</ScholarDefinition> readings from the <ScholarDefinition term="lectionary">lectionary</ScholarDefinition>, linked rather than copied</>, license: 'Copyright USCCB; linked only' },
+  { name: 'API.Bible', url: 'https://api.bible', provides: 'Optional modern translations', license: 'Per-translation license, non-commercial use' },
+  { name: 'OpenBible.info Bible Geocoding Data', url: 'https://www.openbible.info/geo/', provides: 'Every place on the then-and-now map: where it was, how confident scholars are, and the verses that name it', license: 'CC BY 4.0' },
+  { name: 'Digital Atlas of the Roman Empire', url: 'https://dh.gu.se/dare/', provides: 'The Roman-era map', license: '[Confirm before launch: CC BY 4.0 per the latest notice]' },
+  { name: 'OpenStreetMap contributors', url: 'https://www.openstreetmap.org/copyright', provides: 'Today’s map, and the churches on the Support a parish map (searched through the Overpass API)', license: 'ODbL' },
+  { name: 'Leaflet', url: 'https://leafletjs.com', provides: 'The interactive maps', license: 'BSD 2-Clause' },
+  { name: 'Wikidata', url: 'https://www.wikidata.org', provides: 'Linked facts about people and places', license: 'CC0', planned: true },
+  { name: 'OpenAlex', url: 'https://openalex.org', provides: 'Finding scholarly research', license: 'CC0', planned: true },
+  { name: 'catholic-mass-readings (Python package)', url: 'https://pypi.org/project/catholic-mass-readings/', provides: <>Reads the <ScholarDefinition term="usccb" /> readings page once a day</>, license: 'Open source (Apache 2.0)' },
+];
+
 export default function Sources() {
   const { data, isPending, isError } = useQuery({
     queryKey: ['translations'],
@@ -22,36 +40,66 @@ export default function Sources() {
   });
 
   return (
-    <main style={{ maxWidth: 960 }}>
-      <h1>Sources and APIs</h1>
-      <p className="lead">Every text, dataset, and service behind the site, with its license.</p>
+    <main>
+      <h1 className="title-rule">Sources and APIs</h1>
+      <p style={{ margin: '20px 0 0', maxWidth: '56ch' }}>
+        The data behind this site comes from open projects and{' '}
+        <ScholarDefinition term="publicDomain">public-domain</ScholarDefinition> texts. Each one is credited wherever
+        it appears.
+      </p>
 
-      <section style={{ marginTop: 40 }}>
-        <h2>Bible translations</h2>
-        <p>
-          Copyrighted translations are provided by <a href="https://api.bible">API.Bible</a> and shown exactly
-          as supplied, without changes.
+      <div className="table-wrap" style={{ marginTop: 32 }}>
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Source</th>
+              <th>What it provides</th>
+              <th>License or terms</th>
+            </tr>
+          </thead>
+          <tbody>
+            {SOURCES.map((s) => (
+              <tr key={s.name}>
+                <td>
+                  <a href={s.url}>{s.name}</a>
+                  {s.planned && <span className="small-note"> (coming soon)</span>}
+                </td>
+                <td>{s.provides}</td>
+                <td>{s.license}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="small-note" style={{ marginTop: 14 }}>
+        Something missing or credited wrongly? <Link to="/contact">Let me know</Link>.
+      </p>
+
+      <section style={{ marginTop: 48 }}>
+        <h2 style={{ margin: 0, fontSize: 28 }}>Bible translations</h2>
+        <p style={{ maxWidth: '64ch' }}>
+          Copyrighted translations are provided by <a href="https://api.bible">API.Bible</a> and shown exactly as
+          supplied, without changes.
         </p>
         {isPending && <Skeleton height={120} />}
         {isError && <p>The list of translations couldn’t be loaded. Please try again later.</p>}
-        {data?.map((t) => (
-          <article key={t.code} className="card" style={{ marginTop: 16 }}>
-            <h3 style={{ margin: '0 0 6px' }}>
-              {t.name} ({t.code})
-            </h3>
-            <p style={{ margin: 0 }}>
-              {t.license}
-              {t.translated_from ? `. Translated from ${t.translated_from}.` : '.'}
-            </p>
-            {t.citation && <p style={{ margin: '10px 0 0', fontSize: 15 }}>{t.citation}</p>}
-            {!t.citation && t.copyright_notice && <p style={{ margin: '10px 0 0', fontSize: 15 }}>{t.copyright_notice}</p>}
-          </article>
-        ))}
+        <div style={{ display: 'grid', gap: 14 }}>
+          {data?.map((t) => (
+            <article key={t.code} className="card">
+              <h3 style={{ margin: '0 0 6px', fontSize: 20 }}>
+                {t.name} ({t.code})
+              </h3>
+              <p style={{ margin: 0 }} className="muted">
+                {t.license}
+                {t.translated_from ? `. Translated from ${t.translated_from}.` : '.'}
+              </p>
+              {(t.citation ?? t.copyright_notice) && (
+                <p style={{ margin: '10px 0 0', fontSize: 15 }}>{t.citation ?? t.copyright_notice}</p>
+              )}
+            </article>
+          ))}
+        </div>
       </section>
-
-      <p className="todo" style={{ marginTop: 32 }}>
-        To build: the rest of this page (datasets, maps, services) from wireframe 11.
-      </p>
     </main>
   );
 }

@@ -33,7 +33,9 @@ These hold the site's research content. They're empty until content is entered.
 | `canon_books` | The 73 books of the Catholic Bible: code, name, Testament, protocanonical or deuterocanonical, whether it has Greek additions, order, original language, a language note | Pre-filled. The reference list every passage checks against |
 | `eras` | Big periods (for example the Patriarchs or the early Church), with date ranges and order | Groups the timeline |
 | `events` | One event: title, summary, date range and confidence, era, status (`draft`, `in_review`, `published`, `archived`) | Only published events should appear on the site. Includes a built-in search index on the title and summary |
-| `places` | Ancient and modern names, type, coordinates, how sure the location is, Wikidata ID | Powers the then-and-now map. Location confidence can be "traditional" when only tradition places it |
+| `places` | Common, ancient, and modern names, type, coordinates, how sure the location is, Wikidata ID, a note with its draft or checked status, chip order on the map, and where the data came from (`curated` by hand, or `openbible` with its OpenBible.info id and page) | 5 curated places plus 1,337 imported from OpenBible.info | Powers the then-and-now map. Location confidence can be "traditional" when only tradition places it |
+| `place_candidates` | When a place's location is disputed (Emmaus), each proposed site with coordinates, likelihood, and a note | So the map shows every candidate instead of guessing one |
+| `place_passages` | Scripture passages that mention a place | "Read it in Scripture" on the map. The API.Bible job caches these passages too |
 | `people` | Name, other names, whether they're attested outside Scripture, dates, Wikidata ID | Shows what history can and can't confirm |
 | `event_places` | Which places an event happened at, and in what order for journeys | Links events and places, many to many |
 | `event_people` | Who took part in an event, and their role | Same, for people |

@@ -6,8 +6,12 @@ import Contact from './pages/Contact';
 import Miracles from './pages/Miracles';
 import Angels from './pages/Angels';
 import Sources from './pages/Sources';
+import Readings from './pages/Readings';
+import Parish from './pages/Parish';
+import About from './pages/About';
+import MapPage from './pages/MapPage';
 import {
-  About, EventDetail, MapPage, NotFound, Parish, Pathway, Readings, Search, Timeline,
+  EventDetail, NotFound, Pathway, Search, Timeline,
 } from './pages/Stubs';
 
 // Routes match the route table in the blueprint and the numbered wireframes.

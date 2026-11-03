@@ -5,9 +5,10 @@ Catholic faith and biblical history, side by side, with every statement labeled.
 **Live site:** https://shepherds-scholar.gjr6906.workers.dev
 **API:** https://shepherds-scholar.onrender.com ([interactive docs](https://shepherds-scholar.onrender.com/docs))
 
-> **Work in progress.** The home page, the Guide to Mass, Miracles, Angels and demons, and Contact
-> pages are up. The timeline, map, daily readings page, search, and guided pathways are still
-> placeholders, and the research content (events, sources, miracle records) hasn't been entered yet.
+> **Work in progress.** The home page, daily readings, the Guide to Mass, Miracles, Angels and demons,
+> Support a parish, Sources, and Contact pages are up, and About me has its layout but not its story yet.
+> The then-and-now map has every place in the Bible (1,300+, from OpenBible.info), five with hand-written notes. The timeline, search, and guided pathways are still placeholders, and the research content
+> (events, sources, miracle records) hasn't been entered yet.
 > Glossary definitions and faith pages are drafts awaiting review by the Church before launch.
 > The API runs on a free plan, so the first visit after a quiet spell can take up to a minute.
 
@@ -84,6 +85,9 @@ Where things are: `backend/` is the FastAPI API, `frontend/` is the React site, 
     alembic upgrade head
     curl -o data/DRC.json https://raw.githubusercontent.com/scrollmapper/bible_databases/master/formats/json/DRC.json
     python -m scripts.import_douay_rheims data/DRC.json
+    python -m scripts.seed_places                          # the map's five featured places
+    # every other place in the Bible, from OpenBible.info (download commands in the script):
+    python -m scripts.import_openbible_places data/openbible/ancient.jsonl data/openbible/modern.jsonl
     uvicorn app.main:app --reload              # http://localhost:8000/docs
 
 ## Deploy

@@ -25,7 +25,10 @@ export default function Contact() {
   return (
     <main style={{ maxWidth: 720 }}>
       <h1>Contact me</h1>
-      <p className="muted">Questions, corrections, and source suggestions are all welcome.</p>
+      <p className="muted" style={{ marginBottom: 28 }}>
+        Questions, corrections, and source suggestions are all welcome. Corrections are especially helpful while the
+        site is still growing.
+      </p>
       <form onSubmit={onSubmit} className="card" style={{ display: 'grid', gap: 18, borderTop: '3px solid var(--accent)' }}>
         <label style={{ display: 'grid', gap: 6, fontWeight: 500 }}>Name<input name="name" required autoComplete="name" style={field} /></label>
         <label style={{ display: 'grid', gap: 6, fontWeight: 500 }}>Email<input name="email" type="email" required autoComplete="email" style={field} /></label>
@@ -49,6 +52,9 @@ export default function Contact() {
         <p role="status" style={{ margin: 0 }}>
           {status === 'sent' && 'Thank you. Your message is on its way.'}
           {status === 'failed' && (FORM_ID ? 'Something went wrong. Please try again.' : 'The form isn’t connected yet: add VITE_FORMSPREE_ID to frontend/.env.')}
+        </p>
+        <p className="small-note" style={{ margin: 0 }}>
+          Messages are delivered by <a href="https://formspree.io">Formspree</a>. Your email is used only to reply to you.
         </p>
       </form>
     </main>

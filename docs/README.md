@@ -48,10 +48,11 @@ in Neon, so a page view costs no outside API calls.
 |---|---|---|---|
 | React | 18 | Builds the pages from components | Widely used; lots of help available |
 | TypeScript | 5 | JavaScript with type checking | Catches mistakes before the site is built |
-| Vite | 5 | Dev server and production build | Fast reloads; simple config |
-| React Router | 6 | Page addresses like `/mass` and `/miracles` | The standard router for React |
+| Vite | 6 | Dev server and production build | Fast reloads; simple config |
+| React Router | 7 | Page addresses like `/mass` and `/miracles` | The standard router for React |
 | TanStack Query | 5 | Fetches API data, caches it, tracks loading and errors | Saves writing that logic by hand on every page |
 | Framer Motion | 11 | Animations in the hover definitions | Respects the visitor's reduced-motion setting |
+| Leaflet | 1.9.4 | Interactive maps (Support a parish now; the then-and-now map later) | Free, small, works with OpenStreetMap and needs no key |
 | Lucide React | 1 | Icons | Free, consistent icon set |
 | Prettier | (editor) | Formats code on save | Keeps style consistent |
 
@@ -89,6 +90,8 @@ in Neon, so a page view costs no outside API calls.
 | **Neon** | PostgreSQL database | Free | Org Celestial, project `shepherds-scholar` |
 | **API.Bible** | Copyrighted translations (NLT, GNT), cached by a job | Free Starter plan, strictly non-commercial | Key in `API_BIBLE_KEY`. Its rules are in [api-bible-rules.md](api-bible-rules.md) |
 | **USCCB** (bible.usccb.org) | Daily Mass reading references | Public website | Read by the daily job. Only references are stored; the text is copyrighted, so the site links to USCCB |
+| **OpenStreetMap + Overpass API** | Map tiles, and the church search on Support a parish | Free, no account | Must show "© OpenStreetMap contributors" (Leaflet does) and follow the [tile usage policy](https://operations.osmfoundation.org/policies/tiles/). Overpass fair use is about 10,000 searches a day |
+| **OpenBible.info Bible Geocoding Data** | Every place on the map, with confidence and verses | Free, CC BY 4.0 | Imported with `scripts/import_openbible_places.py`. Each imported place links to its OpenBible.info page as the credit |
 | **Formspree** | The Contact form | Free | Form ID in `VITE_FORMSPREE_ID` |
 | **Google Fonts** | Alegreya and Alegreya Sans | Free | Linked in `frontend/index.html` |
 | **scrollmapper/bible_databases** (GitHub) | Source file for the Douay-Rheims text | Public domain | Downloaded once by the import script |

@@ -43,6 +43,9 @@ built files. All data comes from the backend API; the site has no database acces
 
 | File | What it does | Why |
 |---|---|---|
+| `places.ts` | Place types, `useFeaturedPlaces()`, `usePlace(slug)`, and the label and glossary entry for each location confidence | |
+| `readings.ts` | The readings data shape, `useReadings(date)`, and date helpers that use the visitor's own date | The API's "today" is UTC, which is already tomorrow on US evenings |
+| `progress.ts` | Saves and reads guided pathway progress in the browser (`ss:pathway:<slug>`) | No accounts in v1; the Home page reads it to offer "Continue your pathway" |
 | `api.ts` | `apiGet(path)` calls `${VITE_API_URL}/api/v1${path}` and throws `ApiError` on a failed response | Every page calls the API the same way. Falls back to `http://localhost:8000` if `VITE_API_URL` is not set |
 
 ## `src/components/`: shared pieces
@@ -52,23 +55,50 @@ built files. All data comes from the backend API; the site has no database acces
 | `AppShell.tsx` | Wraps every page: nav bar, page content, footer. Sets the page's theme as CSS variables (`--accent`, `--ground`, `--sdef-accent`) and scrolls to the top on page change | Pages don't repeat the layout or set colors themselves |
 | `NavBar.tsx` + `NavBar.css` | Sticky top bar with the site name, a "Free, work in progress" badge, and a menu of every page | One menu shared by the whole site |
 | `LiquidFill.tsx` | The nav bar's color change: the new color sweeps across with bubbles melting into its edge (an SVG "goo" filter) | Carried over from the design prototype. Bubbles use a fixed seed, so they look the same each time |
+| `GlossaryText.tsx` | Finds glossary terms inside text from the API (Mass titles, reading sections) and adds their definitions | So text we don't write still gets definitions |
 | `ScholarDefinition.tsx` + `.css` | Highlighted words that show a short definition on hover, focus, or tap, with "Learn more" and a source link | Explains Catholic terms in place. Adapted from Quantum Lab's `QuantumDefinition`; adds tap support for phones, Escape to close, and reduced motion |
 | `Skeleton.tsx` + `.css` | A grey loading placeholder that only appears if loading takes longer than 300 ms | Fast pages don't flash a placeholder |
+| `ClaimLabel.tsx` | The six claim types as chips (navy for faith, crimson for history, dashed for Debated) and a row of all six | Shared by the Home page and, later, event pages. `disputed` in the database shows as "Debated", as in the design concept |
+| `HowItWorks.tsx` | "How it works": four steps and "The labels you will see" | From the design concept; reused on a future "About this site" page |
+| `HonestNotes.tsx` | The deep blue "Honest notes" band: free, work in progress, how AI was used, keep digging | Your copy from the design concept |
+| `ContinuePathway.tsx` | "Continue your pathway: step 3 of 6" card | Hidden until a visitor starts a pathway |
+| `MapCompare.tsx` | The swipe map: OpenStreetMap underneath, the Roman-era DARE map on top, clipped left of a draggable divider (a keyboard slider). A canvas-drawn dot per place (large for featured), star markers for disputed places' candidate sites, and fly-to on selection (an instant jump for reduced-motion visitors) | Loaded only on `/map`. Zoom stops at 11, where the Roman tiles end |
+| `ParishMap.tsx` | Leaflet map with OpenStreetMap tiles. "Find churches near me" asks for the visitor's location, then searches OpenStreetMap through the Overpass API for Catholic churches within 15 km and lists them with directions | Free, no key. Location goes only to Overpass, never to this site's server. Loaded only on `/parish` |
 | `PageStub.tsx` | Placeholder for pages not built yet, naming the wireframe to build from | Every menu link works while pages are still in progress |
+
+## The glossary rule
+
+Glossary definitions run through the whole site. Whenever a page uses a Catholic, biblical, or
+liturgical term a newcomer might not know, wrap it in `ScholarDefinition`:
+
+```tsx
+<ScholarDefinition term="tabernacle" />                         // shows the glossary's own wording
+<ScholarDefinition term="parish">parishes</ScholarDefinition>   // your wording in the sentence
+```
+
+- Add new terms to `src/data/glossary.ts`, with a definition, a "Learn more" note, an icon, and a
+  source link where there is one.
+- For text that comes from the API, use `<GlossaryText text={...} />`, and add the phrase to its list.
+- Mark a term once per section, not every time it appears.
+- Don't put a definition inside a link or button (such as an Explore card); put it in the text nearby.
 
 ## `src/pages/`: one file per screen
 
 | File | Address | What it does | Status |
 |---|---|---|---|
-| `Home.tsx` | `/` | Headline, links to explore the site, and today's readings | Built |
+| `Home.tsx` | `/` | Hero with today's readings beside it, explore cards with gold top edges, How it works, Honest notes, each in a full-width band | Built from the design concept and wireframe 1 |
+| `Readings.tsx` | `/readings` | One day's Mass readings as references, with previous, today, and next buttons (`?date=`) and the USCCB link | Built (wireframe 5). Readings don't open in the Douay-Rheims yet |
+| `About.tsx` | `/about` | Photo and your story, with Get in touch and How this site works buttons | Layout built from the design concept; the photo and story are placeholders for you to fill in |
+| `MapPage.tsx` | `/map` | The Holy Land, then and now: swipe map with a dot for every place in the Bible (1,300+), a search box, featured place chips, and a place panel (then and today names, location confidence, note, proposed sites, verses that open in the Douay-Rheims, events, OpenBible.info credit) with `?place=` | Built from the design concept and wireframe 4. Clicking any dot, chip, or result focuses the map on it |
+| `Parish.tsx` | `/parish` | Map of nearby Catholic churches (OpenStreetMap), Google Maps button, and links to two Catholic charities | Built from the design concept and wireframe 10 |
 | `TodayReadingsCard.tsx` | (on Home) | Fetches `/readings/today` and lists the references, with a link to USCCB | Built. The pattern for every data-backed card: TanStack Query, a skeleton while loading, a friendly message on error |
 | `Mass.tsx` | `/mass` | A beginner's guide to Mass | Built (wireframe 7) |
 | `Miracles.tsx` | `/miracles` | Investigated miracles, each with its Church status and sources | Layout built from the design canvas; the miracle records are still placeholders like `[Name of the miracle]` |
 | `Angels.tsx` | `/angels` | Angels and demons: what Scripture, the Church, and history say | Built; needs a priest's review before launch |
 | `FaithPages.css` | | Shared layout for Miracles and Angels | |
 | `Contact.tsx` | `/contact` | Contact form that posts to Formspree | Built (wireframe 12). Needs `VITE_FORMSPREE_ID` |
-| `Sources.tsx` | `/sources` | Lists each Bible translation with its license and full citation, from `/translations` | Bible section built (required by API.Bible); the rest of wireframe 11 to build |
-| `Stubs.tsx` | `/timeline`, `/events/:slug`, `/map`, `/readings`, `/search`, `/pathways/:slug`, `/about`, `/parish`, and the 404 page | Placeholders built with `PageStub` | To build |
+| `Sources.tsx` | `/sources` | "Why sources matter", a table of every source with its license, and each Bible translation's full citation | Built (wireframe 11). The table is a static list in v1 |
+| `Stubs.tsx` | `/timeline`, `/events/:slug`, `/search`, `/pathways/:slug`, and the 404 page | Placeholders built with `PageStub` | To build |
 
 ## `src/features/scripture/`: showing Bible text
 
@@ -82,7 +112,7 @@ built files. All data comes from the backend API; the site has no database acces
 | File | What it does | Why |
 |---|---|---|
 | `data/glossary.ts` | Every term `ScholarDefinition` can explain: definition, "Learn more" text, icon, source link | Add or edit terms here. Draft text: check against Church sources before launch |
-| `styles/global.css` | Site-wide colors, fonts (Alegreya and Alegreya Sans), base sizes, buttons, cards | Shared look for every page |
+| `styles/global.css` | Site-wide colors, fonts (Alegreya and Alegreya Sans), base sizes, buttons, cards, plus the design concept's shared styles: full-width bands, gold-edged cards, outline buttons, underlined titles, label chips, scrolling tables | Shared look for every page |
 
 ## Deploying
 

@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 // Placeholder for screens not built yet. `wireframe` matches the numbered screen
 // in the wireframes canvas, which lists each component and the endpoint it calls.
 export default function PageStub({ title, wireframe, design, intro, children }: {
-  title: string; wireframe?: number; design?: string; intro: string; children?: ReactNode;
+  title: string; wireframe?: number; design?: string; intro: ReactNode; children?: ReactNode;
 }) {
   return (
     <main>

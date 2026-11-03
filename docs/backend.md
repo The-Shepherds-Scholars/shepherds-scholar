@@ -32,6 +32,8 @@ Interactive API docs: http://localhost:8000/docs
 | `GET /api/v1/health` | `{"status": "ok"}`, without touching the database | `app/main.py` |
 | `GET /api/v1/translations` | Enabled Bible translations (DRC first) | `app/routers/scripture.py` |
 | `GET /api/v1/passages/{id}?translation=NLT` | One passage's text in the requested translation, or the Douay-Rheims with a note | `app/routers/scripture.py` |
+| `GET /api/v1/places?featured=true` | Places for the map, in chip order (`featured` = only the chips) | `app/routers/places.py` |
+| `GET /api/v1/places/{slug}` | One place: names, location confidence, draft status, candidate sites, Scripture passages, published events | `app/routers/places.py` |
 | `GET /api/v1/readings/today` | Today's Mass reading references and the USCCB link | `app/routers/readings.py` |
 | `GET /api/v1/readings/{YYYY-MM-DD}` | The same for any date | `app/routers/readings.py` |
 
@@ -47,6 +49,7 @@ Interactive API docs: http://localhost:8000/docs
 | `services/scripture.py` | Finds a passage's text: Douay-Rheims from `local_verses`, or API.Bible text from `passage_cache` if under 30 days old, otherwise falls back to the Douay-Rheims and says why | The core reading logic, in one place and tested |
 | `services/versification.py` | Converts Psalm numbers between Hebrew numbering (most modern Bibles) and Greek/Latin numbering (the Douay-Rheims) | Psalm 23 in the NLT is Psalm 22 in the Douay-Rheims |
 | `services/api_bible.py` | Small API.Bible client. Logs every call, and stops when the monthly budget is used up | Used only by the job, so API.Bible costs never depend on traffic |
+| `services/places.py` | Lists places and builds a place's detail; passage labels are built from the book name like every other passage | One place for the map's data rules |
 | `services/readings.py` | Saves and loads daily readings; the USCCB provider that fetches them | Stores references only, since the lectionary text is copyrighted |
 
 ## Daily jobs
@@ -57,7 +60,7 @@ with `python -m …` from `backend/`.
 | File | What it does | Why |
 |---|---|---|
 | `app/jobs/fetch_daily_readings.py` | Fetches readings for today and the next 6 days, skipping dates already stored | A missed day catches up on the next run. USCCB sometimes asks for a browser check, so the workflow installs a headless browser |
-| `app/jobs/refresh_passage_cache.py` | Deletes cached API.Bible text over 30 days old, then fetches passages that are missing or over 25 days old, until the monthly budget runs out. Skips deuterocanonical books for translations that lack them | Follows API.Bible's 30-day rule, and refreshes before the deadline |
+| `app/jobs/refresh_passage_cache.py` | Deletes cached API.Bible text over 30 days old, then fetches passages that are missing or over 25 days old, until the monthly budget runs out. Skips deuterocanonical books for translations that lack them, and the thousands of verses linked to imported places | Follows API.Bible's 30-day rule, and refreshes before the deadline |
 
 The workflow needs the GitHub secret `NEON_DATABASE_URL`. The API.Bible step needs `API_BIBLE_KEY`,
 and skips itself without it.
@@ -66,6 +69,8 @@ and skips itself without it.
 
 | File | What it does | Why |
 |---|---|---|
+| `import_openbible_places.py` | Imports every place from OpenBible.info's Bible Geocoding Data (CC BY 4.0): coordinates, confidence from OpenBible's scores, competing sites, and verse links. Safe to re-run; never touches curated places | See the script's docstring for the download commands and how OpenBible's scores map to Certain/Probable/Possible |
+| `seed_places.py` | Loads the map's featured places (Jerusalem, Bethlehem, Nazareth, Capernaum, Emmaus) with candidates and passages. Safe to re-run. Notes are drafts written with AI help, stored as `notes_status = 'draft'` | Content kept out of migrations so it can be edited and re-run. Run `python -m scripts.seed_places` after migrating |
 | `import_douay_rheims.py` | Loads the Douay-Rheims from `data/DRC.json` into `local_verses`. Safe to re-run. Skips books outside the 73-book Catholic canon | The default translation is stored locally, so it costs nothing to serve and needs no API |
 
 ## `alembic/`: database migrations
@@ -82,6 +87,8 @@ are new. The tables themselves are explained in [database.md](database.md).
 | `versions/scripture_text_cache.py` | Translations, Douay-Rheims verses, the API.Bible cache, daily readings, the API call log |
 | `versions/book_language_info.py` | Each book's original language, and what each translation was made from |
 | `versions/api_bible_nlt_gnt.py` | Adds the NLT and GNT from API.Bible, and whether each translation includes the deuterocanonical books |
+| `versions/place_sources.py` | Marks each place as curated or imported from OpenBible.info, with OpenBible's id and page link |
+| `versions/place_candidates_passages.py` | Places' common name, draft status, and chip order; candidate sites; Scripture passages per place |
 | `versions/api_bible_citations.py` | The full and short API.Bible citation for each translation, required for API.Bible translations |
 
 ## `tests/`
@@ -98,6 +105,8 @@ never use the main branch.
 | `test_scripture.py` | Passage lookup, Psalm numbering, the API.Bible cache, the 30-day limit, fallback notes |
 | `test_versification.py` | Psalm number conversion, including merged and split psalms |
 | `test_jobs.py` | Both daily jobs, using fake API.Bible and USCCB responses |
+| `test_openbible_import.py` | The OpenBible import: curated places kept, no duplicates, names, candidates, Psalm numbering, and that the API.Bible job skips imported verses |
+| `test_places.py` | The places seed (repeatable), place details, and the `/places` endpoints |
 | `test_import.py` | A full Douay-Rheims import. Skipped unless `data/DRC.json` exists |
 
 ## Other files

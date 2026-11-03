@@ -171,6 +171,165 @@ export const GLOSSARY = {
     icon: Cross,
     url: "https://en.wikipedia.org/wiki/Prayer_to_Saint_Michael",
   },
+
+  // ---- Daily readings and the Church's year -------------------------------------------------
+  usccb: {
+    term: "USCCB",
+    definition: "The United States Conference of Catholic Bishops, the assembly of the Catholic bishops of the United States.",
+    moreInfo: "Its website publishes the readings for every day’s Mass. The reading text is copyrighted, so this site shows only the references and links there.",
+    icon: Church,
+    url: "https://www.usccb.org",
+    sourceLabel: "USCCB",
+  },
+  lectionary: {
+    term: "Lectionary",
+    definition: "The book of Scripture readings used at Mass, arranged for every day of the Church’s year.",
+    moreInfo: "Sundays follow a three-year cycle and weekdays a two-year cycle, so over time much of the Bible is read aloud at Mass.",
+    icon: BookOpen,
+    url: "https://en.wikipedia.org/wiki/Lectionary",
+  },
+  alleluia: {
+    term: "Alleluia",
+    definition: "A Hebrew word meaning “Praise the Lord,” sung just before the Gospel to welcome it.",
+    moreInfo: "It comes with a short verse from Scripture. During Lent the Alleluia is not sung, and another acclamation takes its place.",
+    icon: BookOpen,
+    url: "https://en.wikipedia.org/wiki/Alleluia",
+  },
+  ordinaryTime: {
+    term: "Ordinary Time",
+    definition: "The parts of the Church’s year outside its major seasons, when the weeks are simply counted.",
+    moreInfo: "“Ordinary” comes from “ordinal,” meaning counted, as in the Thirty-first Week. Its color is green.",
+    icon: Church,
+    url: "https://en.wikipedia.org/wiki/Ordinary_Time",
+  },
+  advent: {
+    term: "Advent",
+    definition: "The four weeks before Christmas, when the Church prepares to celebrate Jesus’s birth and looks ahead to his return.",
+    moreInfo: "It begins the Church’s year. Its color is violet, with rose on the third Sunday.",
+    icon: Church,
+    url: "https://en.wikipedia.org/wiki/Advent",
+  },
+  lent: {
+    term: "Lent",
+    definition: "The forty days before Easter, a season of prayer, fasting, and giving to the poor.",
+    moreInfo: "It begins on Ash Wednesday. Its color is violet.",
+    icon: Church,
+    url: "https://en.wikipedia.org/wiki/Lent",
+  },
+  solemnity: {
+    term: "Solemnity",
+    definition: "The highest rank of celebration in the Church’s calendar, such as Christmas, Easter, or All Saints.",
+    moreInfo: "Below it come feasts, then memorials. A solemnity has its own readings and the Gloria and Creed at Mass.",
+    icon: Church,
+    url: "https://en.wikipedia.org/wiki/Solemnity",
+  },
+  feast: {
+    term: "Feast",
+    definition: "A celebration in the Church’s calendar ranked between a solemnity and a memorial, such as the feast of an apostle.",
+    moreInfo: "A feast has its own readings. The Gloria is sung, but the Creed is usually not said on a weekday feast.",
+    icon: Church,
+    url: "https://en.wikipedia.org/wiki/Feast_day",
+  },
+  memorial: {
+    term: "Memorial",
+    definition: "A day in the Church’s calendar that honors a saint, the lowest rank of celebration.",
+    moreInfo: "Some memorials are required and some are optional. The day’s weekday readings are often still used.",
+    icon: Church,
+    url: "https://en.wikipedia.org/wiki/Memorial_(liturgy)",
+  },
+
+  // ---- The then-and-now map ---------------------------------------------------------------------
+  romanEra: {
+    term: "Roman era",
+    definition: "The centuries when Rome ruled the Holy Land, from 63 BC, when the general Pompey took Jerusalem, into the early Church.",
+    moreInfo: "The Roman-era map shows the region in Latin, as Roman maps named it: Hierosolyma for Jerusalem, Mare Galilaeae for the Sea of Galilee.",
+    icon: BookOpen,
+    url: "https://en.wikipedia.org/wiki/Judaea_(Roman_province)",
+  },
+  stadia: {
+    term: "Stadia",
+    definition: "A Greek and Roman unit of distance. One stadion was about 185 meters, so 60 stadia is roughly 11 km (7 miles).",
+    moreInfo: "The exact length varied from place to place, which is one reason distances in ancient texts are hard to pin down.",
+    icon: BookOpen,
+    url: "https://en.wikipedia.org/wiki/Stadion_(unit)",
+  },
+  crusades: {
+    term: "Crusades",
+    definition: "Military expeditions from Western Europe to the Holy Land between 1096 and 1291, which for a time set up Crusader kingdoms there.",
+    moreInfo: "Crusaders built or rebuilt many churches at holy sites, and some of the sites they named are still honored today.",
+    icon: BookOpen,
+    url: "https://en.wikipedia.org/wiki/Crusades",
+  },
+  locCertain: {
+    term: "Certain",
+    definition: "Where this place was is not in doubt, usually because it has been lived in without a break since ancient times.",
+    moreInfo: "Certain means the location, not every event said to have happened there.",
+    icon: BookOpen,
+  },
+  locProbable: {
+    term: "Probable",
+    definition: "Most scholars accept this identification, based on ruins, inscriptions, or ancient descriptions, though it isn’t beyond doubt.",
+    moreInfo: "New evidence could still change it, which is why the sources are listed.",
+    icon: BookOpen,
+  },
+  locPossible: {
+    term: "Possible",
+    definition: "One of the sites scholars propose. The evidence fits, but other sites fit too.",
+    moreInfo: "When a place has several possible sites, the map shows all of them.",
+    icon: BookOpen,
+  },
+  locTraditional: {
+    term: "Traditional",
+    definition: "Honored as the place by long Christian tradition, though historians can’t confirm it from other evidence.",
+    moreInfo: "Many traditional sites go back to pilgrims of the fourth century and later.",
+    icon: Church,
+  },
+  locUnknown: {
+    term: "Uncertain",
+    definition: "Where this place was isn’t known. Scholars have proposed several sites, and none is settled.",
+    moreInfo: "Each proposed site is shown on the map with what supports it.",
+    icon: BookOpen,
+  },
+
+  // ---- The six claim labels (claims.claim_type) ----------------------------------------------
+  claimScripture: {
+    term: "Scripture",
+    definition: "A statement of what the Bible says, with the passage cited so you can read it yourself.",
+    moreInfo: "It reports what the text says. Whether an event can also be shown historically is a separate, History-labeled statement.",
+    icon: BookOpen,
+  },
+  claimChurchTeaching: {
+    term: "Church teaching",
+    definition: "What the Catholic Church teaches, citing the Catechism or another Church document.",
+    moreInfo: "Teaching is about faith and morals. It is labeled separately from history so the two are never mixed up.",
+    icon: Church,
+    url: "https://www.vatican.va/archive/ENG0015/_INDEX.HTM",
+    sourceLabel: "Catechism of the Catholic Church",
+  },
+  claimTradition: {
+    term: "Tradition",
+    definition: "Something handed down in the Church over centuries, such as where an event is remembered to have taken place.",
+    moreInfo: "Some traditions are very old and well supported; others are pious customs. The sources show which.",
+    icon: Church,
+  },
+  claimHistoricalConsensus: {
+    term: "Historical consensus",
+    definition: "What most historians agree on, based on the surviving evidence.",
+    moreInfo: "Consensus can change when new evidence turns up, which is why each statement lists its sources.",
+    icon: BookOpen,
+  },
+  claimScholarlyHypothesis: {
+    term: "Scholarly hypothesis",
+    definition: "A reasoned idea some scholars hold, but not settled.",
+    moreInfo: "Hypotheses are shown so you can see the conversation, not because the site endorses them.",
+    icon: BookOpen,
+  },
+  claimDebated: {
+    term: "Debated",
+    definition: "Experts disagree, and the evidence points more than one way.",
+    moreInfo: "Each side’s sources are shown, so you can weigh them yourself.",
+    icon: BookOpen,
+  },
 } satisfies Record<string, GlossaryEntry>;
 
 export type GlossaryTerm = keyof typeof GLOSSARY;

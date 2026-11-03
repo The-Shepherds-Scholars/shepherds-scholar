@@ -40,6 +40,9 @@ WITH linked AS (
     SELECT passage_id FROM event_passages
     UNION
     SELECT passage_id FROM claim_passages
+    UNION
+    -- Only hand-written places: imported ones link thousands of verses and would spend the budget.
+    SELECT pp.passage_id FROM place_passages pp JOIN places p ON p.id = pp.place_id WHERE p.data_source = 'curated'
 )
 SELECT sp.*, t.code AS tr_code, t.api_bible_id, t.versification AS tr_versification
 FROM linked l

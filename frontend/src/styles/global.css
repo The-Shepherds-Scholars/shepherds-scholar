@@ -41,3 +41,50 @@ main { max-width: 1120px; margin: 0 auto; padding: 56px 24px 88px; }
   html { scroll-behavior: auto; }
   body { transition: none; }
 }
+
+/* ---- Concept styles (The Shepherd's Scholar design concept) ---- */
+/* Full-width color bands: a page renders <main className="bands"> and each <section className="band">
+   holds a .container, so backgrounds run edge to edge while text keeps the page width. */
+main.bands { max-width: none; padding: 0; }
+.band { padding: 56px 0; }
+.band--surface { background: var(--surface); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.band--navy { background: #213a68; color: #e8edf5; --sdef-accent: #e2c27a; }
+.band--navy h2, .band--navy h3 { color: #fff; }
+.container { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+.hero { padding: 72px 0 64px; }
+.eyebrow { color: var(--accent); font-weight: 500; font-size: 16px; margin: 0; }
+
+/* Cards with the concept's gold top edge. */
+.card--gold { background: #fbfaf8; border-top: 3px solid #b08a3e; }
+.card h3 { font-family: var(--font-display); }
+
+/* Outlined button next to a filled one. */
+.button--outline { background: transparent; color: var(--accent); border: 1.5px solid var(--accent); }
+
+/* Page title with the short accent underline used on Sources, Parish, and Angels. */
+.title-rule { display: inline-block; padding-bottom: 10px; border-bottom: 3px solid #a3282e; margin: 0; }
+
+/* Claim label chips: faith labels in navy, history labels in crimson, debated dashed. */
+.chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.chip {
+  display: inline-block; padding: 6px 12px; border-radius: 8px; font-size: 15px; line-height: 1.3;
+  background: #fff; border: 1px solid currentColor; white-space: nowrap;
+  --sdef-accent: currentColor; /* a glossary term inside a chip takes the chip's color */
+}
+.chip--faith { color: #1f3a6b; }
+.chip--history { color: #8e1b2b; }
+.chip--debated { color: #8e1b2b; border-style: dashed; }
+
+/* Plain data table that scrolls sideways on phones. */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.table { width: 100%; min-width: 640px; border-collapse: collapse; font-size: 16px; }
+.table th { text-align: left; padding: 14px 16px; background: #f7f8fa; border-bottom: 1px solid var(--line); }
+.table td { padding: 14px 16px; border-top: 1px solid var(--line); vertical-align: top; }
+.table tr:first-child td { border-top: 0; }
+.table td:last-child { color: var(--muted); }
+
+.small-note { font-size: 15px; color: var(--muted); }
+@media (max-width: 600px) {
+  .band { padding: 40px 0; }
+  .hero { padding: 48px 0 40px; }
+}
