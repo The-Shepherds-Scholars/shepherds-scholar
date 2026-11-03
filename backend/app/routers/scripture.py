@@ -14,8 +14,12 @@ router = APIRouter(prefix="/api/v1", tags=["scripture"])
 class TranslationOut(BaseModel):
     code: str
     name: str
+    source: str  # "local" or "api_bible"
     license: str
     translated_from: str | None
+    copyright_notice: str | None
+    citation: str | None
+    citation_short: str | None
 
 
 class BookOut(BaseModel):
@@ -47,11 +51,14 @@ class PassageOut(BaseModel):
     fetched_at: datetime | None
     fell_back: bool
     notice: str | None
+    citation: str | None
 
 
 @router.get("/translations", response_model=list[TranslationOut])
 def translations(conn: Connection = Depends(get_conn)):
-    return [TranslationOut(code=t.code, name=t.name, license=t.license, translated_from=t.translated_from)
+    return [TranslationOut(code=t.code, name=t.name, source=t.source, license=t.license,
+                           translated_from=t.translated_from, copyright_notice=t.copyright_notice,
+                           citation=t.citation, citation_short=t.citation_short)
             for t in scripture.list_translations(conn)]
 
 

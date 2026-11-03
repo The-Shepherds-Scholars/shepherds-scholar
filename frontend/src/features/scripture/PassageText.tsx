@@ -23,6 +23,7 @@ type Passage = {
   fums_token: string | null;
   fell_back: boolean;
   notice: string | null;
+  citation: string | null;  // API.Bible short citation, e.g. "NLT © 1996, 2004, 2015 Tyndale House Foundation. All rights reserved."
 };
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
@@ -72,6 +73,12 @@ export function PassageText({ passageId, translation }: { passageId: string; tra
       </p>
       {/* API.Bible requires the copyright line beside every passage it supplies. */}
       {passage.copyright && <small className="copyright">{passage.copyright}</small>}
+      {passage.citation && (
+        <small className="copyright" style={{ display: "block" }}>
+          {passage.citation} Full notice on the <a href="/sources">Sources page</a>. Provided by{" "}
+          <a href="https://api.bible">API.Bible</a>.
+        </small>
+      )}
     </figure>
   );
 }

@@ -24,6 +24,11 @@ export default function AppShell() {
       <footer style={{ borderTop: '1px solid var(--line)' }}>
         <div style={{ maxWidth: 1120, margin: '0 auto', padding: '28px 24px', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: 12, fontSize: 15, color: 'var(--muted)' }}>
           <span>The Shepherd’s Scholar. Free, ad-free, and a work in progress.</span>
+          {/* API.Bible Starter plan: a visible citation and link to api.bible on every page. */}
+          <span>
+            Scripture text provided by <a href="https://api.bible">API.Bible</a>.{' '}
+            <Link to="/sources">Bible copyrights</Link>
+          </span>
           <Link to="/contact">Contact</Link>
         </div>
       </footer>

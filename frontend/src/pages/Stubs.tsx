@@ -27,9 +27,6 @@ export const Parish = () => (
     <a className="button" href="https://www.google.com/maps/search/catholic+church+near+me">Find Catholic churches near me</a>
   </PageStub>
 );
-export const Sources = () => (
-  <PageStub title="Sources and APIs" wireframe={11} intro="Every text, dataset, and service behind the site, with its license." />
-);
 export const NotFound = () => (
   <main>
     <h1>Page not found</h1>

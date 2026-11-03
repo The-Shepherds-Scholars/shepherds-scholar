@@ -38,6 +38,8 @@ class Translation:
     copyright_notice: str | None
     translated_from: str | None = None
     includes_deuterocanon: bool = True
+    citation: str | None = None  # full API.Bible citation, for the Sources page
+    citation_short: str | None = None  # short form, shown under each passage
 
 
 @dataclass
@@ -72,6 +74,7 @@ class PassageText:
     fetched_at: datetime | None
     fell_back: bool  # True when the requested translation could not be served
     notice: str | None
+    citation: str | None = None  # API.Bible citation (short form) for the translation shown
 
 
 def ref_from_row(row) -> Ref:
@@ -98,7 +101,8 @@ def get_translation(conn: Connection, code: str | None) -> Translation:
 
 def _translation(r) -> Translation:
     return Translation(r.code, r.name, r.source, r.api_bible_id, r.versification,
-                       r.license, r.copyright_notice, r.translated_from, r.includes_deuterocanon)
+                       r.license, r.copyright_notice, r.translated_from, r.includes_deuterocanon,
+                       r.citation, r.citation_short)
 
 
 def get_book(conn: Connection, code: str) -> BookInfo:
@@ -210,6 +214,7 @@ def get_passage(conn: Connection, passage_id: UUID, translation_code: str | None
             fetched_at=cached.fetched_at,
             fell_back=False,
             notice=None,
+            citation=translation.citation_short,
         )
 
     default = get_translation(conn, None)

@@ -31,8 +31,10 @@ def test_whole_split_psalm(conn):
 
 
 def _add_api_translation(conn):
-    conn.execute(text("""INSERT INTO bible_translations (code, name, source, api_bible_id, versification, license)
-                         VALUES ('RSVCE', 'Test API Bible', 'api_bible', 'abc-01', 'hebrew', 'Licensed via API.Bible')"""))
+    conn.execute(text("""INSERT INTO bible_translations (code, name, source, api_bible_id, versification, license,
+                                                         citation, citation_short)
+                         VALUES ('RSVCE', 'Test API Bible', 'api_bible', 'abc-01', 'hebrew', 'Licensed via API.Bible',
+                                 'Full test citation', 'TEST © 2000')"""))
 
 
 def test_api_translation_without_cache_falls_back(conn):
@@ -52,6 +54,7 @@ def test_fresh_cache_served_with_fums_token(conn):
                  {"p": pid, "t": datetime.now(timezone.utc) - timedelta(days=10)})
     p = scripture.get_passage(conn, pid, "RSVCE")
     assert (p.content, p.copyright, p.fums_token, p.fell_back) == ("cached text", "(c) Publisher", "tok-1", False)
+    assert p.citation == "TEST © 2000"
 
 
 def test_cache_older_than_30_days_is_not_served(conn):
@@ -108,10 +111,20 @@ def test_format_reference_shapes():
 
 def test_deuterocanonical_book_missing_from_translation_explains_why(conn):
     conn.execute(text("""INSERT INTO bible_translations (code, name, source, api_bible_id, versification, license,
-                                                         includes_deuterocanon)
-                         VALUES ('PROT', 'Test 66-book Bible', 'api_bible', 'p-01', 'hebrew', 'Licensed', FALSE)"""))
+                                                         includes_deuterocanon, citation, citation_short)
+                         VALUES ('PROT', 'Test 66-book Bible', 'api_bible', 'p-01', 'hebrew', 'Licensed', FALSE,
+                                 'Full test citation', 'TEST © 2000')"""))
     add_verses(conn, "TOB", 12, [(15, "I am the angel Raphael")])
     pid = add_passage(conn, "TOB", 12, 15, label="Tobit 12:15")
     p = scripture.get_passage(conn, pid, "PROT")
     assert p.fell_back and p.translation_code == "DRC"
     assert "doesn’t include Tobit" in p.notice
+
+
+def test_api_bible_translation_requires_citation(conn):
+    import pytest
+    from sqlalchemy.exc import IntegrityError
+    with pytest.raises(IntegrityError):
+        with conn.begin_nested():
+            conn.execute(text("""INSERT INTO bible_translations (code, name, source, api_bible_id, versification, license)
+                                 VALUES ('NOCITE', 'No citation', 'api_bible', 'x-01', 'hebrew', 'Licensed')"""))

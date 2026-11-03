@@ -32,8 +32,10 @@ def _client(conn, calls):
 
 
 def _add_api_translation(conn):
-    conn.execute(text("""INSERT INTO bible_translations (code, name, source, api_bible_id, versification, license)
-                         VALUES ('RSVCE', 'Test API Bible', 'api_bible', 'abc-01', 'hebrew', 'Licensed')"""))
+    conn.execute(text("""INSERT INTO bible_translations (code, name, source, api_bible_id, versification, license,
+                                                         citation, citation_short)
+                         VALUES ('RSVCE', 'Test API Bible', 'api_bible', 'abc-01', 'hebrew', 'Licensed',
+                                 'Full test citation', 'TEST © 2000')"""))
 
 
 def test_paths():
@@ -110,8 +112,9 @@ def test_readings_fetched_once_per_date(conn):
 
 def test_refresh_skips_books_the_translation_lacks(conn):
     conn.execute(text("""INSERT INTO bible_translations (code, name, source, api_bible_id, versification, license,
-                                                         includes_deuterocanon)
-                         VALUES ('PROT', 'Test 66-book Bible', 'api_bible', 'p-01', 'hebrew', 'Licensed', FALSE)"""))
+                                                         includes_deuterocanon, citation, citation_short)
+                         VALUES ('PROT', 'Test 66-book Bible', 'api_bible', 'p-01', 'hebrew', 'Licensed', FALSE,
+                                 'Full test citation', 'TEST © 2000')"""))
     tob = add_passage(conn, "TOB", 12, 15, label="Tobit 12:15")
     jhn = add_passage(conn, "JHN", 3, 16, label="John 3:16")
     _event_with_passage(conn, tob)
