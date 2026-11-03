@@ -106,3 +106,17 @@ def test_readings_fetched_once_per_date(conn):
     assert [r.reference for r in stored.readings] == ["Romans 8:31b-39", "Luke 13:31-35"]
     raw = conn.execute(text("SELECT readings FROM daily_readings WHERE reading_date = :d"), {"d": today}).scalar_one()
     assert all(set(x) == {"section", "reference"} for x in raw)  # references only, no text
+
+
+def test_refresh_skips_books_the_translation_lacks(conn):
+    conn.execute(text("""INSERT INTO bible_translations (code, name, source, api_bible_id, versification, license,
+                                                         includes_deuterocanon)
+                         VALUES ('PROT', 'Test 66-book Bible', 'api_bible', 'p-01', 'hebrew', 'Licensed', FALSE)"""))
+    tob = add_passage(conn, "TOB", 12, 15, label="Tobit 12:15")
+    jhn = add_passage(conn, "JHN", 3, 16, label="John 3:16")
+    _event_with_passage(conn, tob)
+    conn.execute(text("INSERT INTO event_passages (event_id, passage_id) SELECT event_id, :p FROM event_passages LIMIT 1"),
+                 {"p": jhn})
+    calls = []
+    report = refresh_passage_cache.refresh(conn, _client(conn, calls))
+    assert report.fetched == 1 and calls == ["/v1/bibles/p-01/verses/JHN.3.16"]

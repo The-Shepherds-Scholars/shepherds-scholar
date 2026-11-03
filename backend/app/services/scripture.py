@@ -37,6 +37,7 @@ class Translation:
     license: str
     copyright_notice: str | None
     translated_from: str | None = None
+    includes_deuterocanon: bool = True
 
 
 @dataclass
@@ -97,7 +98,7 @@ def get_translation(conn: Connection, code: str | None) -> Translation:
 
 def _translation(r) -> Translation:
     return Translation(r.code, r.name, r.source, r.api_bible_id, r.versification,
-                       r.license, r.copyright_notice, r.translated_from)
+                       r.license, r.copyright_notice, r.translated_from, r.includes_deuterocanon)
 
 
 def get_book(conn: Connection, code: str) -> BookInfo:
@@ -212,7 +213,10 @@ def get_passage(conn: Connection, passage_id: UUID, translation_code: str | None
         )
 
     default = get_translation(conn, None)
-    return _serve_local(
-        conn, passage, default, fell_back=True,
-        notice=f"{translation.name} isn’t available for this passage yet, so it’s shown in the {default.name}.",
-    )
+    book = get_book(conn, passage.book_code)
+    if book.canon_status == "deuterocanonical" and not translation.includes_deuterocanon:
+        notice = (f"The {translation.name} doesn’t include {book.name}, one of the deuterocanonical "
+                  f"books found in Catholic Bibles, so it’s shown in the {default.name}.")
+    else:
+        notice = f"{translation.name} isn’t available for this passage yet, so it’s shown in the {default.name}."
+    return _serve_local(conn, passage, default, fell_back=True, notice=notice)

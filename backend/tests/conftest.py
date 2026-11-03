@@ -23,6 +23,9 @@ def engine():
     cfg.set_main_option("script_location", os.path.join(os.path.dirname(__file__), "..", "alembic"))
     cfg.set_main_option("sqlalchemy.url", URL)
     command.upgrade(cfg, "head")
+    # Migrations seed real API.Bible translations (NLT, GNT); tests add their own.
+    with eng.begin() as c:
+        c.execute(text("UPDATE bible_translations SET enabled = FALSE WHERE source = 'api_bible'"))
     return eng
 
 

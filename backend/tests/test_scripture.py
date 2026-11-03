@@ -104,3 +104,14 @@ def test_format_reference_shapes():
     assert f("Psalms", Ref("PSA", 114, 1, 115, None)) == "Psalms 114–115"
     assert f("Mark", Ref("MRK", 15, 42, 16, 8)) == "Mark 15:42–16:8"
     assert f("John", Ref("JHN", 3, 16, 3, 16)) == "John 3:16"
+
+
+def test_deuterocanonical_book_missing_from_translation_explains_why(conn):
+    conn.execute(text("""INSERT INTO bible_translations (code, name, source, api_bible_id, versification, license,
+                                                         includes_deuterocanon)
+                         VALUES ('PROT', 'Test 66-book Bible', 'api_bible', 'p-01', 'hebrew', 'Licensed', FALSE)"""))
+    add_verses(conn, "TOB", 12, [(15, "I am the angel Raphael")])
+    pid = add_passage(conn, "TOB", 12, 15, label="Tobit 12:15")
+    p = scripture.get_passage(conn, pid, "PROT")
+    assert p.fell_back and p.translation_code == "DRC"
+    assert "doesn’t include Tobit" in p.notice

@@ -44,9 +44,12 @@ WITH linked AS (
 SELECT sp.*, t.code AS tr_code, t.api_bible_id, t.versification AS tr_versification
 FROM linked l
 JOIN scripture_passages sp ON sp.id = l.passage_id
+JOIN canon_books cb ON cb.code = sp.book_code
 CROSS JOIN bible_translations t
 LEFT JOIN passage_cache pc ON pc.passage_id = sp.id AND pc.translation_code = t.code
 WHERE t.source = 'api_bible' AND t.enabled
+  -- Don't spend calls on books the translation doesn't have.
+  AND (t.includes_deuterocanon OR cb.canon_status <> 'deuterocanonical')
   AND (pc.fetched_at IS NULL OR pc.fetched_at < now() - make_interval(days => :refresh_days))
 ORDER BY pc.fetched_at NULLS FIRST, sp.canonical_reference
 """
