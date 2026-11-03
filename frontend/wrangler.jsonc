@@ -1,0 +1,10 @@
+{
+  // Cloudflare Workers: serve the built Vite site from dist/ as static files.
+  "name": "shepherds-scholar",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    // React Router handles paths like /saints, so unknown paths return index.html.
+    "not_found_handling": "single-page-application"
+  }
+}
