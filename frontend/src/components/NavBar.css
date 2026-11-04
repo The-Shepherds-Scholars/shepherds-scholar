@@ -7,7 +7,9 @@
 .nav-logo {
   font-family: var(--font-display); font-weight: 700; font-size: clamp(19px, 4.6vw, 22px);
   color: #fff; text-decoration: none; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 10px;
 }
+.nav-logo svg { flex: none; }
 .nav-actions { display: flex; align-items: center; gap: 12px; }
 .nav-badge {
   font-size: 14px; padding: 4px 10px; border: 1px solid rgba(255, 255, 255, 0.75); border-radius: 999px;

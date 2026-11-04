@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { X } from 'lucide-react';
+import CrookBookMark from './CrookBookMark';
 import LiquidFill from './LiquidFill';
 import { ComingSoon } from './StatusTag';
 import { themeFor } from '../theme';
@@ -46,7 +47,10 @@ export default function NavBar() {
       <div className="nav-bar">
         <LiquidFill key={pathname} to={accent} durationMs={FILL_MS} />
         <div className="nav-row">
-          <Link to="/" className="nav-logo">The Shepherd’s Scholar</Link>
+          <Link to="/" className="nav-logo">
+            <CrookBookMark size={30} />
+            The Shepherd’s Scholar
+          </Link>
           <div className="nav-actions">
             <span className="nav-badge">Free, work in progress</span>
             <button
