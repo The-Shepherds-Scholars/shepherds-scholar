@@ -110,6 +110,8 @@ They run every morning in GitHub Actions (the **Daily jobs** workflow; needs the
 
 ## Tests
 
+GitHub runs these automatically on every push and pull request (the **Checks** workflow, `.github/workflows/ci.yml`). To run them yourself:
+
     createdb shepherds_scholar_test
     TEST_DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5432/shepherds_scholar_test pytest
 

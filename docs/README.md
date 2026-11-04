@@ -125,6 +125,7 @@ new build to take effect.
 | `docker-compose.yml` | Starts a local PostgreSQL 16 | Develop without Neon (see [backend.md](backend.md)) |
 | `.gitignore` | Keeps secrets, `node_modules`, `.venv`, builds, and the Bible download out of git | Stops passwords and large files from being committed |
 | `.github/workflows/daily-readings.yml` | The "Daily jobs" workflow | See [backend.md](backend.md#daily-jobs) |
+| `.github/workflows/ci.yml` | The "Checks" workflow: backend tests and the website build on every push and pull request | Catches a broken change before Cloudflare and Render deploy it. Uses a throwaway database, never Neon |
 | `.vscode/tasks.json` | One-click tasks: start the database, set up, migrate, run the API and the site | Same commands for everyone, from the Command Palette |
 | `.vscode/launch.json` | Debugger setups, including "Full stack: API + site" | Breakpoints in Python and the browser at once |
 | `.vscode/settings.json` | Python interpreter, test discovery, formatters, SQLTools connection | The editor works as soon as the folder opens |
