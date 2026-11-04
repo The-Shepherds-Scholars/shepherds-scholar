@@ -28,7 +28,7 @@ const SOURCES: Array<{ name: string; url: string; provides: ReactNode; license: 
   { name: 'API.Bible', url: 'https://api.bible', provides: 'Optional modern translations', license: 'Per-translation license, non-commercial use' },
   { name: 'OpenBible.info Bible Geocoding Data', url: 'https://www.openbible.info/geo/', provides: 'Every place on the then-and-now map: where it was, how confident scholars are, and the verses that name it', license: 'CC BY 4.0' },
   { name: 'Digital Atlas of the Roman Empire', url: 'https://dh.gu.se/dare/', provides: 'The Roman-era map', license: 'CC BY 4.0, per the most recent notice', checking: true },
-  { name: 'OpenStreetMap contributors', url: 'https://www.openstreetmap.org/copyright', provides: 'Today’s map, and the churches on the Support a parish map (searched through the Overpass API)', license: 'ODbL' },
+  { name: 'OpenStreetMap contributors', url: 'https://www.openstreetmap.org/copyright', provides: 'Today’s map, and the churches on the Support a parish map (searched through the Overpass API), and finding a typed address (Nominatim, with suggestions from Photon by Komoot)', license: 'ODbL' },
   { name: 'Leaflet', url: 'https://leafletjs.com', provides: 'The interactive maps', license: 'BSD 2-Clause' },
   { name: 'Wikidata', url: 'https://www.wikidata.org', provides: 'Linked facts about people and places', license: 'CC0', planned: true },
   { name: 'OpenAlex', url: 'https://openalex.org', provides: 'Finding scholarly research', license: 'CC0', planned: true },

@@ -106,3 +106,25 @@ main.bands { max-width: none; padding: 0; }
   background: #f4f7fb; border: 1px dashed #7d93b5; border-radius: 12px; padding: 16px 20px; margin-top: 20px;
 }
 .status-note--check { background: #fdf8ea; border: 1px solid #d9c18a; }
+
+/* About page photo: sticks beside the story on wide screens; on phones and tablets it sits on top and scrolls away.
+   1024px covers tablets, portrait and landscape. */
+.about-photo { position: sticky; top: 96px; }
+@media (max-width: 1024px) {
+  .about-photo { position: static; }
+}
+
+/* Support a parish: map on one side, search and results on the other, the same equal columns the
+   charities used. The columns stack when there isn't room for two 340px columns. */
+.parish-layout {
+  --parish-map-height: 360px;
+  display: grid; gap: 28px; align-items: start;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+}
+/* Side by side, the map stretches to the height of the search column (never under 360px). */
+.parish-map { position: relative; align-self: stretch; display: flex; flex-direction: column; }
+/* The box around the church search's loading state and results, so they stand out from the page. */
+.parish-results {
+  margin-top: 20px; padding: 16px; border: 2px solid #2E4A6B; border-radius: 14px;
+  background: #fff; box-shadow: 0 2px 10px rgba(46, 74, 107, 0.08);
+}

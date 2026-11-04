@@ -14,7 +14,7 @@ const ROSE = '#A8394C';
 export default function About() {
   return (
     <main style={{ display: 'flex', flexWrap: 'wrap', gap: '32px 48px', alignItems: 'flex-start', maxWidth: 1080 }}>
-      <div style={{ flex: '0 1 300px', width: '100%', position: 'sticky', top: 96 }}>
+      <div className="about-photo" style={{ flex: '0 1 300px', width: '100%' }}>
         <img
           src={PHOTO.src}
           alt={PHOTO.alt}

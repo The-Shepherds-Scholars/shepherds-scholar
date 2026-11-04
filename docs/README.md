@@ -14,6 +14,7 @@ This folder explains how the project is put together:
 | [database.md](database.md) | The PostgreSQL schema: every table, what it holds, and why |
 | [api-bible-rules.md](api-bible-rules.md) | API.Bible's rules and how the project follows each one |
 | [translation-citations.md](translation-citations.md) | Copyright wording for Bible translations |
+| [updates/](updates/) | Dated notes on what changed on the site and why |
 
 For first-time setup, see the [main README](../README.md).
 
@@ -90,7 +91,7 @@ in Neon, so a page view costs no outside API calls.
 | **Neon** | PostgreSQL database | Free | Org Celestial, project `shepherds-scholar` |
 | **API.Bible** | Copyrighted translations (NLT, GNT), cached by a job | Free Starter plan, strictly non-commercial | Key in `API_BIBLE_KEY`. Its rules are in [api-bible-rules.md](api-bible-rules.md) |
 | **USCCB** (bible.usccb.org) | Daily Mass reading references | Public website | Read by the daily job. Only references are stored; the text is copyrighted, so the site links to USCCB |
-| **OpenStreetMap + Overpass API** | Map tiles, and the church search on Support a parish | Free, no account | Must show "© OpenStreetMap contributors" (Leaflet does) and follow the [tile usage policy](https://operations.osmfoundation.org/policies/tiles/). Overpass fair use is about 10,000 searches a day |
+| **OpenStreetMap + Overpass API + Nominatim + Photon** | Map tiles, the church search on Support a parish, finding a typed address (Nominatim), and address suggestions while typing (Photon, run by Komoot) | Free, no account | Must show "© OpenStreetMap contributors" (Leaflet does) and follow the [tile usage policy](https://operations.osmfoundation.org/policies/tiles/). Overpass fair use is about 10,000 searches a day. Nominatim's [usage policy](https://operations.osmfoundation.org/policies/nominatim/) allows one search per second and no search while typing, which is why suggestions come from [Photon](https://photon.komoot.io) instead. Photon is free under fair use with no guarantee it stays up, so the Search button still works without it |
 | **OpenBible.info Bible Geocoding Data** | Every place on the map, with confidence and verses | Free, CC BY 4.0 | Imported with `scripts/import_openbible_places.py`. Each imported place links to its OpenBible.info page as the credit |
 | **Formspree** | The Contact form | Free | Form ID in `VITE_FORMSPREE_ID` |
 | **Google Fonts** | Alegreya and Alegreya Sans | Free | Linked in `frontend/index.html` |

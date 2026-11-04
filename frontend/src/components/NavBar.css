@@ -24,3 +24,8 @@
   display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 4px 24px;
 }
 .nav-link { padding: 12px 0; font-size: 19px; color: #1b2230; text-decoration: none; border-bottom: 1px solid rgba(0, 0, 0, 0.08); }
+
+/* Hide the badge on phones and tablets to keep the header uncluttered (the footer still says it's a work in progress). */
+@media (max-width: 1024px) {
+  .nav-badge { display: none; }
+}
