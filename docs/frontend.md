@@ -57,6 +57,7 @@ built files. All data comes from the backend API; the site has no database acces
 | `NavBar.tsx` + `NavBar.css` | Sticky top bar with the site name, a "Free, work in progress" badge, and a menu of every page | One menu shared by the whole site |
 | `LiquidFill.tsx` | The nav bar's color change: the new color sweeps across with bubbles melting into its edge (an SVG "goo" filter) | Carried over from the design prototype. Bubbles use a fixed seed, so they look the same each time |
 | `GlossaryText.tsx` | Finds glossary terms inside text from the API (Mass titles, reading sections) and adds their definitions | So text we don't write still gets definitions |
+| `VideoEmbed.tsx` | A YouTube video shown as a card until the visitor presses play, then YouTube's privacy-enhanced player | Nothing loads from YouTube until someone chooses to watch |
 | `ScholarDefinition.tsx` + `.css` | Highlighted words that show a short definition on hover, focus, or tap, with "Learn more" and a source link | Explains Catholic terms in place. Adapted from Quantum Lab's `QuantumDefinition`; adds tap support for phones, Escape to close, and reduced motion |
 | `Skeleton.tsx` + `.css` | A grey loading placeholder that only appears if loading takes longer than 300 ms | Fast pages don't flash a placeholder |
 | `ClaimLabel.tsx` | The six claim types as chips (navy for faith, crimson for history, dashed for Debated) and a row of all six | Shared by the Home page and, later, event pages. `disputed` in the database shows as "Debated", as in the design concept |
@@ -93,7 +94,7 @@ liturgical term a newcomer might not know, wrap it in `ScholarDefinition`:
 | `MapPage.tsx` | `/map` | The Holy Land, then and now: swipe map with a dot for every place in the Bible (1,300+), a search box, featured place chips, and a place panel (then and today names, location confidence, note, proposed sites, verses that open in the Douay-Rheims, events, OpenBible.info credit) with `?place=` | Built from the design concept and wireframe 4. Clicking any dot, chip, or result focuses the map on it |
 | `Parish.tsx` | `/parish` | Map of nearby Catholic churches (OpenStreetMap), Google Maps button, and links to two Catholic charities | Built from the design concept and wireframe 10 |
 | `TodayReadingsCard.tsx` | (on Home) | Fetches `/readings/today` and lists the references, with a link to USCCB | Built. The pattern for every data-backed card: TanStack Query, a skeleton while loading, a friendly message on error |
-| `Mass.tsx` | `/mass` | A beginner's guide to Mass | Built (wireframe 7) |
+| `Mass.tsx` | `/mass` | A beginner's guide to Mass: note, embedded video, the four parts, step by step with the prayers and postures (from `data/orderOfMass.tsx`), Good to know | Built from the design concept (pages 5–6) and wireframe 7. Draft: needs review by a priest |
 | `Miracles.tsx` | `/miracles` | Investigated miracles, each with its Church status and sources | Layout built from the design canvas; the miracle records are still placeholders like `[Name of the miracle]` |
 | `Angels.tsx` | `/angels` | Angels and demons: what Scripture, the Church, and history say | Built; needs a priest's review before launch |
 | `FaithPages.css` | | Shared layout for Miracles and Angels | |
@@ -112,6 +113,7 @@ liturgical term a newcomer might not know, wrap it in `ScholarDefinition`:
 
 | File | What it does | Why |
 |---|---|---|
+| `data/orderOfMass.tsx` | The order of Mass: each step's posture, what happens, the short responses, public-domain prayers in full, and the opening words of longer prayers with a link to the USCCB | The English Mass texts are © ICEL; only short excerpts are quoted, with credit. Draft: check against the General Instruction of the Roman Missal |
 | `data/glossary.ts` | Every term `ScholarDefinition` can explain: definition, "Learn more" text, icon, source link | Add or edit terms here. Draft text: check against Church sources before launch |
 | `styles/global.css` | Site-wide colors, fonts (Alegreya and Alegreya Sans), base sizes, buttons, cards, plus the design concept's shared styles: full-width bands, gold-edged cards, outline buttons, underlined titles, label chips, scrolling tables | Shared look for every page |
 

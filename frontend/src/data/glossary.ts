@@ -238,6 +238,87 @@ export const GLOSSARY = {
     url: "https://en.wikipedia.org/wiki/Memorial_(liturgy)",
   },
 
+  // ---- The order of Mass ------------------------------------------------------------------------
+  kyrie: {
+    term: "Kyrie",
+    definition: "“Lord, have mercy”: a short prayer asking for God’s mercy, near the start of Mass.",
+    moreInfo: "Kyrie eleison is Greek for “Lord, have mercy.” It is one of the oldest prayers in the Mass and is sometimes still sung in Greek.",
+    icon: Cross,
+    url: "https://en.wikipedia.org/wiki/Kyrie",
+  },
+  gloria: {
+    term: "Gloria",
+    definition: "“Glory to God in the highest”: a hymn of praise sung or said near the start of Mass.",
+    moreInfo: "It begins with the angels’ song at Jesus’s birth (Luke 2:14). It is left out during Advent and Lent.",
+    icon: Cross,
+    url: "https://en.wikipedia.org/wiki/Gloria_in_excelsis_Deo",
+  },
+  collect: {
+    term: "Collect",
+    definition: "The opening prayer of the Mass, which “collects” everyone’s prayers into one. It changes with the day.",
+    moreInfo: "The priest invites everyone to pray, pauses for silent prayer, then says the Collect aloud.",
+    icon: Cross,
+    url: "https://en.wikipedia.org/wiki/Collect",
+  },
+  creed: {
+    term: "Creed",
+    definition: "A summary of what Christians believe. At Sunday Mass it is usually the Nicene Creed, from the councils of 325 and 381.",
+    moreInfo: "The shorter Apostles’ Creed may be used instead, especially during Lent and Easter.",
+    icon: BookOpen,
+    url: "https://en.wikipedia.org/wiki/Nicene_Creed",
+  },
+  universalPrayer: {
+    term: "Universal Prayer",
+    definition: "Also called the Prayer of the Faithful: prayers for the Church, the world, people in need, and the local community.",
+    moreInfo: "A deacon, reader, or cantor reads each request, and everyone answers together.",
+    icon: Cross,
+  },
+  eucharisticPrayer: {
+    term: "Eucharistic Prayer",
+    definition: "The great prayer of thanks at the heart of the Mass, during which the bread and wine are consecrated.",
+    moreInfo: "There are several approved Eucharistic Prayers. Each recalls the Last Supper and ends with the Great Amen.",
+    icon: Cross,
+    url: "https://en.wikipedia.org/wiki/Eucharistic_Prayer",
+  },
+  sanctus: {
+    term: "Sanctus",
+    definition: "“Holy, Holy, Holy”: a hymn sung by everyone during the Eucharistic Prayer.",
+    moreInfo: "It joins the angels’ song in Isaiah 6:3 with the crowd’s welcome of Jesus into Jerusalem in Matthew 21:9.",
+    icon: Cross,
+    url: "https://en.wikipedia.org/wiki/Sanctus",
+  },
+  mysteryOfFaith: {
+    term: "Mystery of Faith",
+    definition: "The acclamation right after the consecration, proclaiming Jesus’s death and resurrection.",
+    moreInfo: "There are three approved responses, and the priest or music leader chooses one.",
+    icon: Cross,
+  },
+  greatAmen: {
+    term: "Great Amen",
+    definition: "The “Amen” everyone sings at the end of the Eucharistic Prayer, saying yes to all that was prayed.",
+    moreInfo: "It is called “great” because it seals the whole Eucharistic Prayer, and it is often sung more than once.",
+    icon: Cross,
+  },
+  signOfPeace: {
+    term: "Sign of Peace",
+    definition: "A gesture of peace shared with people nearby before Communion, often a handshake or a nod.",
+    moreInfo: "Customs vary by place. A nod or a small bow is always fine.",
+    icon: Cross,
+  },
+  agnusDei: {
+    term: "Agnus Dei",
+    definition: "“Lamb of God”: a prayer sung while the priest breaks the consecrated Host before Communion.",
+    moreInfo: "It echoes John the Baptist pointing to Jesus as “the Lamb of God” (John 1:29).",
+    icon: Cross,
+    url: "https://en.wikipedia.org/wiki/Agnus_Dei",
+  },
+  dismissal: {
+    term: "Dismissal",
+    definition: "The last words of the Mass, sending everyone out to live what they have received.",
+    moreInfo: "The word Mass itself comes from the Latin dismissal, “Ite, missa est.”",
+    icon: Cross,
+  },
+
   // ---- The then-and-now map ---------------------------------------------------------------------
   romanEra: {
     term: "Roman era",
