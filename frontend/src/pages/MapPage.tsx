@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import GlossaryText from '../components/GlossaryText';
 import ScholarDefinition from '../components/ScholarDefinition';
 import Skeleton from '../components/Skeleton';
+import { BeingChecked, ComingSoonNote } from '../components/StatusTag';
 import { PassageText } from '../features/scripture/PassageText';
 import { CONFIDENCE, placeLabel, usePlace, usePlaces, type Candidate, type PlaceSummary } from '../lib/places';
 
@@ -48,6 +49,11 @@ export default function MapPage() {
             Drag the round handle across the map to compare. Left of it is the Roman era, right of it is today. With
             a keyboard, focus the handle and use the arrow keys. Click any dot to focus on that place.
           </p>
+          <ComingSoonNote title="Archaeological finds and artifacts">
+            Inscriptions, excavations, and objects that shed light on the Bible, such as the Pilate Stone at Caesarea or
+            the Pool of Siloam in Jerusalem, aren’t on the map yet. Each will show where it was found, what it shows,
+            and what it doesn’t, with its sources.
+          </ComingSoonNote>
         </div>
 
         <section className="card" style={{ padding: 24 }}>
@@ -266,7 +272,11 @@ function PlacePanel({ slug }: { slug: string | null }) {
       )}
 
       <div className="small-note" style={{ marginTop: 20, paddingTop: 12, borderTop: '1px solid var(--line)', display: 'grid', gap: 6 }}>
-        {place.notes && place.notes_status === 'draft' && <span>Draft note, drafted with AI help and still being checked against sources.</span>}
+        {place.notes && place.notes_status === 'draft' && (
+          <span>
+            <BeingChecked /> Draft note, drafted with AI help and still being checked against sources.
+          </span>
+        )}
         {imported && (
           <span>
             Location, confidence, and verses from{' '}

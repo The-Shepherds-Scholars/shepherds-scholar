@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import ScholarDefinition from '../components/ScholarDefinition';
 import Skeleton from '../components/Skeleton';
+import { BeingChecked, ComingSoon } from '../components/StatusTag';
 import { apiGet } from '../lib/api';
 
 // Sources and APIs, styled after the design concept (page 13) and wireframe 11.
@@ -19,14 +20,14 @@ interface Translation {
   citation: string | null;
 }
 
-const SOURCES: Array<{ name: string; url: string; provides: ReactNode; license: string; planned?: boolean }> = [
+const SOURCES: Array<{ name: string; url: string; provides: ReactNode; license: string; planned?: boolean; checking?: boolean }> = [
   { name: 'Douay-Rheims Bible, Challoner revision', url: 'https://github.com/scrollmapper/bible_databases', provides: <>The Scripture text, all 73 books, including the <ScholarDefinition term="deuterocanonical">deuterocanonical</ScholarDefinition> ones</>, license: 'Public domain' },
   { name: 'USCCB daily readings', url: 'https://bible.usccb.org/daily-bible-reading', provides: <>The day’s <ScholarDefinition term="mass">Mass</ScholarDefinition> readings from the <ScholarDefinition term="lectionary">lectionary</ScholarDefinition>, linked rather than copied</>, license: 'Copyright USCCB; linked only' },
   { name: 'The Roman Missal, English translation (ICEL)', url: 'https://www.usccb.org/prayer-and-worship/the-mass/order-of-mass', provides: 'The short prayers and responses quoted in the Guide to Mass; longer prayers link to the USCCB', license: '© 2010 ICEL; short excerpts, credited' },
   { name: 'Catholic Mass 101 (Ascension Presents)', url: 'https://www.youtube.com/watch?v=RS8NrJ0Y5O8', provides: 'The video on the Guide to Mass, played from YouTube only when you press play', license: 'Embedded under YouTube’s terms; not copied' },
   { name: 'API.Bible', url: 'https://api.bible', provides: 'Optional modern translations', license: 'Per-translation license, non-commercial use' },
   { name: 'OpenBible.info Bible Geocoding Data', url: 'https://www.openbible.info/geo/', provides: 'Every place on the then-and-now map: where it was, how confident scholars are, and the verses that name it', license: 'CC BY 4.0' },
-  { name: 'Digital Atlas of the Roman Empire', url: 'https://dh.gu.se/dare/', provides: 'The Roman-era map', license: '[Confirm before launch: CC BY 4.0 per the latest notice]' },
+  { name: 'Digital Atlas of the Roman Empire', url: 'https://dh.gu.se/dare/', provides: 'The Roman-era map', license: 'CC BY 4.0, per the most recent notice', checking: true },
   { name: 'OpenStreetMap contributors', url: 'https://www.openstreetmap.org/copyright', provides: 'Today’s map, and the churches on the Support a parish map (searched through the Overpass API)', license: 'ODbL' },
   { name: 'Leaflet', url: 'https://leafletjs.com', provides: 'The interactive maps', license: 'BSD 2-Clause' },
   { name: 'Wikidata', url: 'https://www.wikidata.org', provides: 'Linked facts about people and places', license: 'CC0', planned: true },
@@ -64,10 +65,13 @@ export default function Sources() {
               <tr key={s.name}>
                 <td>
                   <a href={s.url}>{s.name}</a>
-                  {s.planned && <span className="small-note"> (coming soon)</span>}
+                  {s.planned && <> <ComingSoon /></>}
                 </td>
                 <td>{s.provides}</td>
-                <td>{s.license}</td>
+                <td>
+                  {s.license}
+                  {s.checking && <> <BeingChecked /></>}
+                </td>
               </tr>
             ))}
           </tbody>

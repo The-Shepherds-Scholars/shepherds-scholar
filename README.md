@@ -6,7 +6,7 @@ Catholic faith and biblical history, side by side, with every statement labeled.
 **API:** https://shepherds-scholar.onrender.com ([interactive docs](https://shepherds-scholar.onrender.com/docs))
 
 > **Work in progress.** The home page, daily readings, the Guide to Mass, Miracles, Angels and demons,
-> Support a parish, Sources, and Contact pages are up, and About me has its layout but not its story yet.
+> Support a parish, Sources, Contact, and About me pages are up.
 > The then-and-now map has every place in the Bible (1,300+, from OpenBible.info), five with hand-written notes. The timeline, search, and guided pathways are still placeholders, and the research content
 > (events, sources, miracle records) hasn't been entered yet.
 > Glossary definitions and faith pages are drafts awaiting review by the Church before launch.

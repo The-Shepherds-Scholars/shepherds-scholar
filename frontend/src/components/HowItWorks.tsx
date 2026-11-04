@@ -1,11 +1,14 @@
+import type React from 'react';
 import ScholarDefinition from './ScholarDefinition';
 import { ClaimLabelRow } from './ClaimLabel';
+import { ComingSoon } from './StatusTag';
 
 // "How it works" from the design concept: four steps, then the six claim labels.
 // Shared by the Home page and the "About this site" page.
-const STEPS = [
+const STEPS: Array<{ title: string; body: React.ReactNode; soon?: boolean }> = [
   {
     title: 'Follow the timeline',
+    soon: true,
     body: (
       <>
         Move from the <ScholarDefinition term="patriarchs">Patriarchs</ScholarDefinition> to the early Church.
@@ -44,7 +47,8 @@ export default function HowItWorks() {
         <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', marginTop: 24 }}>
           {STEPS.map((s) => (
             <div key={s.title} className="card">
-              <h3 style={{ margin: '0 0 8px', fontSize: 20, fontFamily: 'var(--font-body)', fontWeight: 700 }}>{s.title}</h3>
+              {s.soon && <ComingSoon />}
+              <h3 style={{ margin: s.soon ? '8px 0 8px' : '0 0 8px', fontSize: 20, fontFamily: 'var(--font-body)', fontWeight: 700 }}>{s.title}</h3>
               <p style={{ margin: 0 }}>{s.body}</p>
             </div>
           ))}

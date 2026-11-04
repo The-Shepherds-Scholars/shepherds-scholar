@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import ScholarDefinition from '../components/ScholarDefinition';
+import { BeingChecked, ComingSoon } from '../components/StatusTag';
 import './FaithPages.css';
 
 // Ported from the "Miracles" artboard in the design canvas. Theme: Our Lady of Guadalupe (gown).
@@ -101,7 +102,18 @@ export default function Miracles() {
       <section className="fp-section">
         <h2 style={{ marginBottom: 20 }}>The records</h2>
         <div className="fp-grid fp-records">
-          {RECORDS.map((r, i) => (
+          {RECORDS.map((r, i) =>
+            r.status === null ? (
+              // Not researched yet: show what's coming, never the template text.
+              <article key={i} className="fp-card fp-record">
+                <p className="fp-kind">{r.kind}</p>
+                <ComingSoon />
+                <p className="fp-summary">
+                  A {r.kind.toLowerCase()} record is being researched: what was reported, who investigated it, what they
+                  concluded, and the sources.
+                </p>
+              </article>
+            ) : (
             <article key={i} className="fp-card fp-record">
               <p className="fp-kind">{r.kind}</p>
               <h3>{r.name}</h3>
@@ -119,7 +131,8 @@ export default function Miracles() {
                   : '[links]'}
               </p>
             </article>
-          ))}
+            ),
+          )}
         </div>
       </section>
 
@@ -136,7 +149,7 @@ export default function Miracles() {
       </section>
 
       <p className="fp-draft">
-        Draft page, drafted with AI help. Every record will be checked against Church and scientific sources before it is published.
+        <BeingChecked /> Draft page, drafted with AI help. Every record will be checked against Church and scientific sources before it is published.
       </p>
     </main>
   );

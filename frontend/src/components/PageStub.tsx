@@ -1,20 +1,24 @@
 import type { ReactNode } from 'react';
+import { ComingSoon } from './StatusTag';
 
-// Placeholder for screens not built yet. `wireframe` matches the numbered screen
-// in the wireframes canvas, which lists each component and the endpoint it calls.
-export default function PageStub({ title, wireframe, design, intro, children }: {
-  title: string; wireframe?: number; design?: string; intro: ReactNode; children?: ReactNode;
+// Placeholder for screens not built yet. Visitors see "Coming soon" and what the page will do.
+// `wireframe` matches the numbered screen in the wireframes, which lists its components and API calls.
+export default function PageStub({ title, wireframe, intro, coming, children }: {
+  title: string; wireframe?: number; intro: ReactNode; coming?: ReactNode; children?: ReactNode;
 }) {
   return (
-    <main>
-      <h1>{title}</h1>
+    <main data-wireframe={wireframe}>
+      <ComingSoon />
+      <h1 style={{ marginTop: 12 }}>{title}</h1>
       <p className="lead">{intro}</p>
       {children}
-      <p className="todo" style={{ marginTop: 32 }}>
-        {wireframe
-          ? `To build: see wireframe ${wireframe} for this screen’s components and API calls.`
-          : `To build: copy the finished layout from the “${design}” artboard in the design canvas.`}
-      </p>
+      <aside className="status-note" role="note" style={{ marginTop: 32, maxWidth: '64ch' }}>
+        <strong style={{ display: 'block' }}>This page is still being built.</strong>
+        <span style={{ display: 'block', marginTop: 6 }}>
+          {coming ?? 'It will appear here once its content has been gathered and checked.'} Until then, try the{' '}
+          <a href="/map">then-and-now map</a> or <a href="/readings">today’s readings</a>.
+        </span>
+      </aside>
     </main>
   );
 }

@@ -1,5 +1,6 @@
 import ScholarDefinition from '../components/ScholarDefinition';
 import VideoEmbed from '../components/VideoEmbed';
+import { BeingChecked } from '../components/StatusTag';
 import { ORDER_OF_MASS, ORDER_OF_MASS_URL, type Line, type Step } from '../data/orderOfMass';
 
 // A beginner's guide to Mass: design concept pages 5 and 6, wireframe 7, plus the order of Mass
@@ -160,7 +161,7 @@ export default function Mass() {
       </section>
 
       <p className="small-note" style={{ marginTop: 32, paddingTop: 14, borderTop: '1px solid var(--line)' }}>
-        Draft guide, drafted with AI help and still being checked against Church sources.
+        <BeingChecked /> Draft guide, drafted with AI help and still being checked against Church sources.
       </p>
     </main>
   );

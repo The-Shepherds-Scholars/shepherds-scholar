@@ -238,6 +238,15 @@ export const GLOSSARY = {
     url: "https://en.wikipedia.org/wiki/Memorial_(liturgy)",
   },
 
+  baptism: {
+    term: "Baptism",
+    definition: "The first sacrament, in which a person is washed with water in the name of the Father, the Son, and the Holy Spirit, and becomes a member of the Church.",
+    moreInfo: "Many Catholics are baptized as babies, but children and adults can be baptized at any age.",
+    icon: Cross,
+    url: "https://www.vatican.va/archive/ENG0015/__P3E.HTM",
+    sourceLabel: "Catechism of the Catholic Church",
+  },
+
   // ---- The order of Mass ------------------------------------------------------------------------
   kyrie: {
     term: "Kyrie",

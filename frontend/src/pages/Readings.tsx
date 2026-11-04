@@ -2,6 +2,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import GlossaryText from '../components/GlossaryText';
 import ScholarDefinition from '../components/ScholarDefinition';
 import Skeleton from '../components/Skeleton';
+import { ComingSoon } from '../components/StatusTag';
 import { addDays, formatLongDate, isISODate, localISODate, useReadings } from '../lib/readings';
 
 // Wireframe 5. Mass readings for one date, as references with a link to the full text at the USCCB.
@@ -89,7 +90,7 @@ export default function Readings() {
 
       <p className="muted" style={{ fontSize: 15, marginTop: 20 }}>
         The <ScholarDefinition term="lectionary">lectionary</ScholarDefinition> text belongs to the USCCB, so only
-        the references are shown here. Soon each reading will open in the{' '}
+        the references are shown here. <ComingSoon /> Each reading will open in the{' '}
         <ScholarDefinition term="publicDomain">public-domain</ScholarDefinition>{' '}
         <ScholarDefinition term="douayRheims" />. Until then, browse the{' '}
         <Link to="/timeline">timeline</Link>.

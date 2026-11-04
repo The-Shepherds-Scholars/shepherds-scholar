@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { X } from 'lucide-react';
 import LiquidFill from './LiquidFill';
+import { ComingSoon } from './StatusTag';
 import { themeFor } from '../theme';
 import './NavBar.css';
 
@@ -19,6 +20,9 @@ const LINKS: Array<[string, string]> = [
   ['/sources', 'Sources and APIs'],
   ['/contact', 'Contact'],
 ];
+
+// Pages that are placeholders for now; the menu marks them "Coming soon".
+const COMING_SOON = new Set(['/timeline', '/search']);
 
 const FILL_MS = 4000;
 
@@ -77,6 +81,12 @@ export default function NavBar() {
                 style={({ isActive }) => (isActive ? { color: accent, fontWeight: 700 } : undefined)}
               >
                 {label}
+                {COMING_SOON.has(to) && (
+                  <>
+                    {' '}
+                    <ComingSoon />
+                  </>
+                )}
               </NavLink>
             ))}
           </div>

@@ -2,13 +2,15 @@ import { Link } from 'react-router-dom';
 import ContinuePathway from '../components/ContinuePathway';
 import HowItWorks from '../components/HowItWorks';
 import HonestNotes from '../components/HonestNotes';
+import { ComingSoon } from '../components/StatusTag';
 import TodayReadingsCard from './TodayReadingsCard';
 
 // Home, styled after the design concept (page 1), with the wireframe's readings card and
 // "Continue your pathway" (wireframe 1, callouts 3 and 4). Bands run edge to edge.
 
-const EXPLORE: Array<[string, string, string]> = [
+const EXPLORE: Array<[string, string, string, boolean?]> = [
   ['/map', 'Then and now map', 'Slide between the Roman-era map and today’s, and see how sure scholars are about each place.'],
+  ['/timeline', 'Timeline', 'From the Patriarchs to the early Church, with dates shown as honest ranges.', true],
   ['/mass', 'A beginner’s guide to Mass', 'What happens at Mass and what to expect, whether it’s your first time or your first in a while.'],
   ['/miracles', 'Miracles', 'Investigated events, inspired by St. Carlo Acutis, with where the evidence stops and faith begins.'],
   ['/angels', 'Angels and demons', 'What Scripture says, what the Church teaches, and what history records.'],
@@ -52,9 +54,10 @@ export default function Home() {
         <div className="container">
           <h2 style={{ margin: '0 0 24px', fontSize: 32 }}>Explore the site</h2>
           <div className="grid">
-            {EXPLORE.map(([to, title, blurb]) => (
+            {EXPLORE.map(([to, title, blurb, soon]) => (
               <Link key={to} to={to} className="card card--gold" style={{ textDecoration: 'none', color: 'inherit' }}>
-                <h3 style={{ margin: 0, fontSize: 22 }}>{title}</h3>
+                {soon && <ComingSoon />}
+                <h3 style={{ margin: soon ? '8px 0 0' : 0, fontSize: 22 }}>{title}</h3>
                 <p className="muted" style={{ margin: '6px 0 0', fontSize: 16 }}>{blurb}</p>
               </Link>
             ))}

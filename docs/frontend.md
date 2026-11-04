@@ -66,6 +66,7 @@ built files. All data comes from the backend API; the site has no database acces
 | `ContinuePathway.tsx` | "Continue your pathway: step 3 of 6" card | Hidden until a visitor starts a pathway |
 | `MapCompare.tsx` | The swipe map: OpenStreetMap underneath, the Roman-era DARE map on top, clipped left of a draggable divider (a keyboard slider). A canvas-drawn dot per place (large for featured), star markers for disputed places' candidate sites, and fly-to on selection (an instant jump for reduced-motion visitors) | Loaded only on `/map`. Zoom stops at 11, where the Roman tiles end |
 | `ParishMap.tsx` | Leaflet map with OpenStreetMap tiles. "Find churches near me" asks for the visitor's location, then searches OpenStreetMap through the Overpass API for Catholic churches within 15 km and lists them with directions | Free, no key. Location goes only to Overpass, never to this site's server. Loaded only on `/parish` |
+| `StatusTag.tsx` | The two status labels: `<ComingSoon />` for anything not built yet, `<BeingChecked />` for content not yet verified, plus boxed note versions | Visitors always know what's unfinished or unverified |
 | `PageStub.tsx` | Placeholder for pages not built yet, naming the wireframe to build from | Every menu link works while pages are still in progress |
 
 ## The glossary rule
@@ -84,13 +85,22 @@ liturgical term a newcomer might not know, wrap it in `ScholarDefinition`:
 - Mark a term once per section, not every time it appears.
 - Don't put a definition inside a link or button (such as an Explore card); put it in the text nearby.
 
+## The status rule
+
+Mark anything unfinished or unverified so visitors are never misled:
+
+- **Not built yet** (a page, section, or feature): `<ComingSoon />`, or `<ComingSoonNote title="…">what it will do</ComingSoonNote>`.
+- **Exists but not checked against sources** (AI-drafted notes, glossary drafts, places' notes): `<BeingChecked />`.
+- Never show template text like `[Name]` to visitors; show a Coming soon card instead.
+- Placeholder pages use `PageStub` with a `coming` sentence; unfinished pages are listed in `COMING_SOON` in `NavBar.tsx`.
+
 ## `src/pages/`: one file per screen
 
 | File | Address | What it does | Status |
 |---|---|---|---|
 | `Home.tsx` | `/` | Hero with today's readings beside it, explore cards with gold top edges, How it works, Honest notes, each in a full-width band | Built from the design concept and wireframe 1 |
 | `Readings.tsx` | `/readings` | One day's Mass readings as references, with previous, today, and next buttons (`?date=`) and the USCCB link | Built (wireframe 5). Readings don't open in the Douay-Rheims yet |
-| `About.tsx` | `/about` | Photo and your story, with Get in touch and How this site works buttons | Layout built from the design concept; the photo and story are placeholders for you to fill in |
+| `About.tsx` | `/about` | Lupe's photo (`public/lupe.jpg`, resized to 900 px) and her story, in her own words | Built from the design concept and wireframe 9. Don't reword the story |
 | `MapPage.tsx` | `/map` | The Holy Land, then and now: swipe map with a dot for every place in the Bible (1,300+), a search box, featured place chips, and a place panel (then and today names, location confidence, note, proposed sites, verses that open in the Douay-Rheims, events, OpenBible.info credit) with `?place=` | Built from the design concept and wireframe 4. Clicking any dot, chip, or result focuses the map on it |
 | `Parish.tsx` | `/parish` | Map of nearby Catholic churches (OpenStreetMap), Google Maps button, and links to two Catholic charities | Built from the design concept and wireframe 10 |
 | `TodayReadingsCard.tsx` | (on Home) | Fetches `/readings/today` and lists the references, with a link to USCCB | Built. The pattern for every data-backed card: TanStack Query, a skeleton while loading, a friendly message on error |

@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import ScholarDefinition from '../components/ScholarDefinition';
+import { BeingChecked } from '../components/StatusTag';
 import './FaithPages.css';
 
 // Ported from the "Angels and demons" artboard in the design canvas.
@@ -135,7 +136,7 @@ export default function Angels() {
         </p>
       </section>
 
-      <p className="fp-draft">Draft page, drafted with AI help. To be reviewed by a priest before it is published.</p>
+      <p className="fp-draft"><BeingChecked /> Draft page, drafted with AI help. To be reviewed by a priest before it is published.</p>
     </main>
   );
 }
