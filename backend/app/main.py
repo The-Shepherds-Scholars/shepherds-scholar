@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 
 from app.core.config import get_settings
-from app.routers import places, readings, scripture
+from app.routers import analytics, places, readings, scripture
 
 app = FastAPI(title="The Shepherd’s Scholar API", version="0.2.0")
 
@@ -21,6 +21,7 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 app.include_router(scripture.router)
 app.include_router(readings.router)
 app.include_router(places.router)
+app.include_router(analytics.router)
 
 
 @app.get("/api/v1/health")

@@ -75,6 +75,15 @@ export default function Sources() {
         Something missing or credited wrongly? <Link to="/contact">Let me know</Link>.
       </p>
 
+      <section style={{ marginTop: 48, maxWidth: '64ch' }}>
+        <h2 style={{ margin: 0, fontSize: 28 }}>Visit counts</h2>
+        <p>
+          To learn which pages help people most, the site counts page views and clicks as daily totals, such as
+          “14 visits to the map today.” It doesn’t use cookies or store anything that identifies you, and it never
+          reads what you type. If your browser sends Do Not Track or Global Privacy Control, you aren’t counted.
+        </p>
+      </section>
+
       <section style={{ marginTop: 48 }}>
         <h2 style={{ margin: 0, fontSize: 28 }}>Bible translations</h2>
         <p style={{ maxWidth: '64ch' }}>

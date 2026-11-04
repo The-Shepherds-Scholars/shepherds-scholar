@@ -45,6 +45,7 @@ built files. All data comes from the backend API; the site has no database acces
 |---|---|---|
 | `places.ts` | Place types, `useFeaturedPlaces()`, `usePlace(slug)`, and the label and glossary entry for each location confidence | |
 | `readings.ts` | The readings data shape, `useReadings(date)`, and date helpers that use the visitor's own date | The API's "today" is UTC, which is already tomorrow on US evenings |
+| `analytics.ts` | Counts page views and clicks on links, buttons, and glossary terms, sent in batches to `/api/v1/analytics`. Add `data-track="…"` to name a click clearly | No cookies, no IDs, never reads form fields; skips Do Not Track, Global Privacy Control, automated browsers, and local development (unless `VITE_ANALYTICS=on`) |
 | `progress.ts` | Saves and reads guided pathway progress in the browser (`ss:pathway:<slug>`) | No accounts in v1; the Home page reads it to offer "Continue your pathway" |
 | `api.ts` | `apiGet(path)` calls `${VITE_API_URL}/api/v1${path}` and throws `ApiError` on a failed response | Every page calls the API the same way. Falls back to `http://localhost:8000` if `VITE_API_URL` is not set |
 

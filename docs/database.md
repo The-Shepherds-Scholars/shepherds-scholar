@@ -62,6 +62,7 @@ and place names (`pg_trgm`), for the search page.
 | `daily_readings` | Each date's Mass title, the reading references (as JSON), the USCCB link, provider, fetch time | References only, since the lectionary text is copyrighted. One row per date and type of Mass |
 | `external_api_calls` | A log of every outside API call: provider, endpoint, status, success, time | Lets the job enforce the monthly API.Bible budget |
 | `external_api_usage` (view) | API call counts per provider per day | `SELECT * FROM external_api_usage ORDER BY day DESC;` to check usage |
+| `analytics_daily` | Daily totals of page views and clicks: day, `view` or `click`, page path, what was clicked, count | No visitor data at all: no IP, cookie, or browser details. Read with `scripts/analytics_report.py` |
 | `alembic_version` | Which migration the database is on | Managed by Alembic; don't edit |
 
 ## How a passage is served

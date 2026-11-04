@@ -2,12 +2,17 @@ import { useEffect } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import NavBar from './NavBar';
 import { themeFor } from '../theme';
+import { startAnalytics, trackPageView } from '../lib/analytics';
 
 // Wraps every page: shared nav, page colors, footer. Sets the theme as CSS variables on
 // <html> so links, buttons, and ScholarDefinition all follow the route's saint palette.
 export default function AppShell() {
   const { pathname } = useLocation();
   const theme = themeFor(pathname);
+
+  // Count visits and clicks (no personal data; see lib/analytics.ts).
+  useEffect(() => startAnalytics(), []);
+  useEffect(() => trackPageView(pathname), [pathname]);
 
   useEffect(() => {
     const root = document.documentElement.style;
