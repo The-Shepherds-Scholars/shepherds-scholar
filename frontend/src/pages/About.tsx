@@ -11,6 +11,9 @@ const PHOTO = {
 
 const ROSE = '#A8394C';
 
+// Lupe's personal portfolio, for visitors who want to see her other projects.
+const PORTFOLIO_URL = 'https://guadalupejromero.onrender.com';
+
 export default function About() {
   return (
     <main style={{ display: 'flex', flexWrap: 'wrap', gap: '32px 48px', alignItems: 'flex-start', maxWidth: 1080 }}>
@@ -136,6 +139,15 @@ export default function About() {
           <Link className="button" to="/contact">Get in touch</Link>
           <a className="button button--outline" href="/#how" style={{ color: ROSE, borderColor: ROSE }}>
             How this site works
+          </a>
+          <a
+            className="button button--outline"
+            href={PORTFOLIO_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: ROSE, borderColor: ROSE }}
+          >
+            See my other projects
           </a>
         </div>
       </article>
