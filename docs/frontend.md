@@ -13,7 +13,9 @@ built files. All data comes from the backend API; the site has no database acces
 3. `App.tsx` maps each address (`/mass`, `/miracles`, …) to a page component.
 4. Every page is wrapped in `AppShell`, which draws the nav bar and footer and sets the page's
    colors.
-5. Pages that need data call the API through `src/lib/api.ts`, using `VITE_API_URL`.
+5. Pages that need data call the API through `src/lib/api.ts`, using `VITE_API_URL`. The map's
+   places and artifacts are read first from static files in `public/data/` (see below), and only
+   from the API if those files are missing.
 
 ## Configuration files
 
@@ -29,6 +31,7 @@ built files. All data comes from the backend API; the site has no database acces
 | `.env.example` | The same settings with safe defaults | Copy to `.env` on first setup |
 | `.prettierrc` | Single quotes, lines up to 110 characters | Consistent formatting on save |
 | `.gitignore` | Ignores `node_modules/` and `dist/` | Both are rebuilt from the source |
+| `public/data/` | `places.json`, `places/<slug>.json`, and `artifacts.json`, written by `backend/scripts/export_static_data.py` and committed weekly by the **Weekly data** workflow. Don't edit by hand; change the database and re-export | Cloudflare serves these with the site, so the map loads fast and works even while the Render API is asleep |
 
 ## `src/`: entry points
 
@@ -43,11 +46,12 @@ built files. All data comes from the backend API; the site has no database acces
 
 | File | What it does | Why |
 |---|---|---|
-| `places.ts` | Place types, `useFeaturedPlaces()`, `usePlace(slug)`, and the label and glossary entry for each location confidence | |
+| `places.ts` | Place types, `usePlaces()`, `usePlace(slug)`, and the label and glossary entry for each location confidence | Reads `/data/places.json` and `/data/places/<slug>.json` through `staticGet` |
+| `artifacts.ts` | Artifact types and `useArtifacts()`, which reads `/data/artifacts.json` | For the map's artifacts layer (coming soon). Each artifact has `authenticity`: show `debated` and `forgery` clearly, and show `unreviewed` or `notes_status: 'draft'` as Being checked. A photo always comes with its license, credit, and Commons page; show all three |
 | `readings.ts` | The readings data shape, `useReadings(date)`, and date helpers that use the visitor's own date | The API's "today" is UTC, which is already tomorrow on US evenings |
 | `analytics.ts` | Counts page views and clicks on links, buttons, and glossary terms, sent in batches to `/api/v1/analytics`. Add `data-track="…"` to name a click clearly | No cookies, no IDs, never reads form fields; skips Do Not Track, Global Privacy Control, automated browsers, and local development (unless `VITE_ANALYTICS=on`) |
 | `progress.ts` | Saves and reads guided pathway progress in the browser (`ss:pathway:<slug>`) | No accounts in v1; the Home page reads it to offer "Continue your pathway" |
-| `api.ts` | `apiGet(path)` calls `${VITE_API_URL}/api/v1${path}` and throws `ApiError` on a failed response | Every page calls the API the same way. Falls back to `http://localhost:8000` if `VITE_API_URL` is not set |
+| `api.ts` | `apiGet(path)` calls `${VITE_API_URL}/api/v1${path}` and throws `ApiError` on a failed response. `staticGet(path)` reads `/data${path}.json` from the site itself, and calls `apiGet(path)` if that file is missing | Every page calls the API the same way. Falls back to `http://localhost:8000` if `VITE_API_URL` is not set. A missing static file comes back as `index.html` (Cloudflare's and Vite's page fallback), so `staticGet` checks that the answer is JSON |
 
 ## `src/components/`: shared pieces
 

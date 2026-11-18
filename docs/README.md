@@ -24,22 +24,30 @@ For first-time setup, see the [main README](../README.md).
  Visitor's browser
        │
        ▼
- Cloudflare Workers ──── serves the built React site (static files)
-       │  the page calls the API with fetch()
+ Cloudflare Workers ──── serves the built React site (static files),
+       │                 including the map's data in /data/*.json
+       │  the page calls the API with fetch() for everything else
        ▼
  Render (free web service) ──── runs the FastAPI backend in Docker
        │  SQL over TLS
        ▼
  Neon ──── PostgreSQL database (Ohio, aws-us-east-2)
        ▲
-       │  writes once a day
- GitHub Actions ──── "Daily jobs" workflow: fetches Mass readings from USCCB
-                     and refreshes API.Bible text
+       │  writes once a day / once a week
+ GitHub Actions ──── "Daily jobs": Mass readings from USCCB, API.Bible text
+                     "Weekly data": artifacts from Wikidata, then exports the map's
+                     places and artifacts to frontend/public/data/ and commits them,
+                     which makes Cloudflare rebuild the site
 ```
 
 The site never talks to the database directly; it only calls the API. The API never calls
-API.Bible or USCCB while a visitor waits. Background jobs fetch that data ahead of time and store it
-in Neon, so a page view costs no outside API calls.
+API.Bible, USCCB, or Wikidata while a visitor waits. Background jobs fetch that data ahead of time
+and store it in Neon, so a page view costs no outside API calls.
+
+Data that only changes when an import runs (the map's places and artifacts) goes one step further:
+it is exported to static files that Cloudflare serves. A visit to the map then touches neither Render
+nor Neon. Render's free plan sleeps and runs one small server, so this keeps the map fast however
+many people visit at once, and keeps Neon's free compute hours for the pages that need them.
 
 ## Tech stack
 
@@ -93,6 +101,8 @@ in Neon, so a page view costs no outside API calls.
 | **USCCB** (bible.usccb.org) | Daily Mass reading references | Public website | Read by the daily job. Only references are stored; the text is copyrighted, so the site links to USCCB |
 | **OpenStreetMap + Overpass API + Nominatim + Photon** | Map tiles, the church search on Support a parish, finding a typed address (Nominatim), and address suggestions while typing (Photon, run by Komoot) | Free, no account | Must show "© OpenStreetMap contributors" (Leaflet does) and follow the [tile usage policy](https://operations.osmfoundation.org/policies/tiles/). Overpass fair use is about 10,000 searches a day. Nominatim's [usage policy](https://operations.osmfoundation.org/policies/nominatim/) allows one search per second and no search while typing, which is why suggestions come from [Photon](https://photon.komoot.io) instead. Photon is free under fair use with no guarantee it stays up, so the Search button still works without it |
 | **OpenBible.info Bible Geocoding Data** | Every place on the map, with confidence and verses | Free, CC BY 4.0 | Imported with `scripts/import_openbible_places.py`. Each imported place links to its OpenBible.info page as the credit |
+| **Wikidata** (Query Service) | Artifacts found at the map's places, and the photo, museum, and find spot of curated artifacts | Free, no key, CC0 | Read weekly by `scripts/import_wikidata_artifacts.py` with a descriptive User-Agent and a pause between queries, as the Query Service asks. Each artifact links to its Wikidata page |
+| **Wikimedia Commons** | Artifact photos, with each photo's license and author | Free; each photo has its own license (often CC BY or CC BY-SA) | The import stores the license, credit, and Commons page with every photo. The site must show all three wherever it shows the photo. Photos are linked, not copied, so they use no storage |
 | **Formspree** | The Contact form | Free | Form ID in `VITE_FORMSPREE_ID` |
 | **Google Fonts** | Alegreya and Alegreya Sans | Free | Linked in `frontend/index.html` |
 | **scrollmapper/bible_databases** (GitHub) | Source file for the Douay-Rheims text | Public domain | Downloaded once by the import script |
@@ -126,6 +136,7 @@ new build to take effect.
 | `docker-compose.yml` | Starts a local PostgreSQL 16 | Develop without Neon (see [backend.md](backend.md)) |
 | `.gitignore` | Keeps secrets, `node_modules`, `.venv`, builds, and the Bible download out of git | Stops passwords and large files from being committed |
 | `.github/workflows/daily-readings.yml` | The "Daily jobs" workflow | See [backend.md](backend.md#daily-jobs) |
+| `.github/workflows/weekly-data.yml` | The "Weekly data" workflow: Wikidata artifacts import, then the static export of the map's data | See [backend.md](backend.md#weekly-data) |
 | `.github/workflows/ci.yml` | The "Checks" workflow: backend tests and the website build on every push and pull request | Catches a broken change before Cloudflare and Render deploy it. Uses a throwaway database, never Neon |
 | `.vscode/tasks.json` | One-click tasks: start the database, set up, migrate, run the API and the site | Same commands for everyone, from the Command Palette |
 | `.vscode/launch.json` | Debugger setups, including "Full stack: API + site" | Breakpoints in Python and the browser at once |

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { apiGet } from './api';
+import { staticGet } from './api';
 import type { GlossaryTerm } from '../data/glossary';
 
 // Places for the then-and-now map: GET /api/v1/places and /api/v1/places/:slug.
@@ -50,7 +50,7 @@ export const CONFIDENCE: Record<LocationConfidence, { label: string; term: Gloss
 export function usePlaces() {
   return useQuery({
     queryKey: ['places', 'all'],
-    queryFn: () => apiGet<PlaceSummary[]>('/places'),
+    queryFn: () => staticGet<PlaceSummary[]>('/places'),
     staleTime: 60 * 60 * 1000,
   });
 }
@@ -63,7 +63,7 @@ export function placeLabel(p: Pick<PlaceSummary, 'name' | 'modern_name'>): strin
 export function usePlace(slug: string | null) {
   return useQuery({
     queryKey: ['place', slug],
-    queryFn: () => apiGet<PlaceDetail>(`/places/${slug}`),
+    queryFn: () => staticGet<PlaceDetail>(`/places/${slug}`),
     enabled: !!slug,
     staleTime: 60 * 60 * 1000,
   });

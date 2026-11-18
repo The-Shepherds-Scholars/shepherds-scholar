@@ -24,6 +24,10 @@ Interactive API docs: http://localhost:8000/docs
   reading text. API.Bible text is cached for at most 30 days, with its copyright line, as API.Bible
   requires.
 - **Plain SQL.** Queries are written as SQL through SQLAlchemy, not hidden behind an ORM.
+- **Data that only changes on import is served as static files.** Places and artifacts are
+  exported weekly to `frontend/public/data/` and served by Cloudflare, so the map never waits for
+  Render to wake up. The `/places` and `/artifacts` endpoints return the same JSON and are what the
+  site falls back to (for example in local development before an export).
 
 ## Endpoints
 
@@ -34,6 +38,7 @@ Interactive API docs: http://localhost:8000/docs
 | `GET /api/v1/passages/{id}?translation=NLT` | One passage's text in the requested translation, or the Douay-Rheims with a note | `app/routers/scripture.py` |
 | `GET /api/v1/places?featured=true` | Places for the map, in chip order (`featured` = only the chips) | `app/routers/places.py` |
 | `GET /api/v1/places/{slug}` | One place: names, location confidence, draft status, candidate sites, Scripture passages, published events | `app/routers/places.py` |
+| `GET /api/v1/artifacts` | Every artifact: find site and coordinates, dates, museum, photo with license and credit, authenticity, and the claims on published events it bears on. Curated first, then oldest first | `app/routers/artifacts.py` |
 | `POST /api/v1/analytics` | Adds page views and clicks to daily totals. Accepts JSON sent as text/plain (from `sendBeacon`), up to 50 events | `app/routers/analytics.py` |
 | `GET /api/v1/readings/today` | Today's Mass reading references and the USCCB link | `app/routers/readings.py` |
 | `GET /api/v1/readings/{YYYY-MM-DD}` | The same for any date | `app/routers/readings.py` |
@@ -51,6 +56,8 @@ Interactive API docs: http://localhost:8000/docs
 | `services/versification.py` | Converts Psalm numbers between Hebrew numbering (most modern Bibles) and Greek/Latin numbering (the Douay-Rheims) | Psalm 23 in the NLT is Psalm 22 in the Douay-Rheims |
 | `services/api_bible.py` | Small API.Bible client. Logs every call, and stops when the monthly budget is used up | Used only by the job, so API.Bible costs never depend on traffic |
 | `services/places.py` | Lists places and builds a place's detail; passage labels are built from the book name like every other passage | One place for the map's data rules |
+| `routers/artifacts.py` | The `/artifacts` endpoint and its response shape | Same split. The static export reuses these shapes, so the files and the API always match |
+| `services/artifacts.py` | Lists every artifact with its place, its location (the find spot, else the place's), a date label, and its claims on published events | One query for the whole list; it's small enough to send in one file |
 | `services/readings.py` | Saves and loads daily readings; the USCCB provider that fetches them | Stores references only, since the lectionary text is copyrighted |
 
 ## Daily jobs
@@ -66,6 +73,24 @@ with `python -m …` from `backend/`.
 The workflow needs the GitHub secret `NEON_DATABASE_URL`. The API.Bible step needs `API_BIBLE_KEY`,
 and skips itself without it.
 
+## Weekly data
+
+The **Weekly data** workflow (`.github/workflows/weekly-data.yml`) runs on Mondays at 11:00 UTC, or
+from the Actions tab with "Run workflow". It:
+
+1. Stops with a clear error if Neon isn't on the latest migration. It never migrates by itself.
+2. Runs `scripts/import_wikidata_artifacts.py`. If Wikidata is down, the run carries on.
+3. Runs `scripts/export_static_data.py`, which writes `frontend/public/data/`.
+4. Commits those files as `github-actions[bot]` if anything changed, which makes Cloudflare rebuild
+   the site. The export has no timestamps, so a week with no changes makes no commit.
+
+It needs the `NEON_DATABASE_URL` secret, and permission to push to `main`. If `main` is ever
+protected, allow `github-actions[bot]` to push or the commit step will fail.
+
+Render also redeploys on each of these commits even though only website files changed. That is
+harmless, but you can stop it in Render under Settings > Build Filters by including only
+`backend/**`.
+
 ## `scripts/`
 
 | File | What it does | Why |
@@ -73,6 +98,9 @@ and skips itself without it.
 | `import_openbible_places.py` | Imports every place from OpenBible.info's Bible Geocoding Data (CC BY 4.0): coordinates, confidence from OpenBible's scores, competing sites, and verse links. Safe to re-run; never touches curated places | See the script's docstring for the download commands and how OpenBible's scores map to Certain/Probable/Possible |
 | `analytics_report.py` | Prints the most-visited pages and most-clicked items: `python -m scripts.analytics_report --days 7`, or `--page /map` for one page | Read-only |
 | `seed_places.py` | Loads the map's featured places (Jerusalem, Bethlehem, Nazareth, Capernaum, Emmaus) with candidates and passages. Safe to re-run. Notes are drafts written with AI help, stored as `notes_status = 'draft'` | Content kept out of migrations so it can be edited and re-run. Run `python -m scripts.seed_places` after migrating |
+| `seed_artifacts.py` | Loads 7 hand-picked artifacts: the Pilate Stone, the Caiaphas ossuary, the Temple Warning inscription, the Magdala Stone, the Capernaum synagogue, the Siloam inscription, and the James ossuary (marked `debated`). Safe to re-run. Descriptions are drafts written with AI help (`notes_status = 'draft'`) | Run after `seed_places` and the OpenBible import, so find sites like Caesarea and Magdala exist. Photos come from the Wikidata import, not this file |
+| `import_wikidata_artifacts.py` | For every place with a Wikidata id, imports items whose "location of discovery" is that place and whose date falls between 3001 BCE and 700 CE. Imports are marked `unreviewed`. Also fills curated artifacts' empty photo, museum, find spot, and year found, and gets each photo's license and author from Wikimedia Commons | Run weekly by the Weekly data workflow. Never overwrites curated text. Fetches everything before writing, so Neon isn't kept awake while waiting on Wikidata |
+| `export_static_data.py` | Writes `places.json`, `places/<slug>.json`, and `artifacts.json` to `frontend/public/data/` (or a folder you name), using the same response shapes as the API | Lets Cloudflare serve the map's data, so visitors never wait for Render or use Neon's free hours |
 | `import_douay_rheims.py` | Loads the Douay-Rheims from `data/DRC.json` into `local_verses`. Safe to re-run. Skips books outside the 73-book Catholic canon | The default translation is stored locally, so it costs nothing to serve and needs no API |
 
 ## `alembic/`: database migrations
@@ -93,6 +121,7 @@ are new. The tables themselves are explained in [database.md](database.md).
 | `versions/place_sources.py` | Marks each place as curated or imported from OpenBible.info, with OpenBible's id and page link |
 | `versions/place_candidates_passages.py` | Places' common name, draft status, and chip order; candidate sites; Scripture passages per place |
 | `versions/api_bible_citations.py` | The full and short API.Bible citation for each translation, required for API.Bible translations |
+| `versions/artifacts.py` | Artifacts (finds, with authenticity, dates, photos and their licenses) and `claim_artifacts`, plus the rule that only accepted artifacts can support a claim |
 
 ## `tests/`
 
@@ -111,6 +140,7 @@ never use the main branch.
 | `test_openbible_import.py` | The OpenBible import: curated places kept, no duplicates, names, candidates, Psalm numbering, and that the API.Bible job skips imported verses |
 | `test_analytics.py` | Visit and click counting, daily totals, and rejecting bad or oversized input |
 | `test_places.py` | The places seed (repeatable), place details, and the `/places` endpoints |
+| `test_artifacts.py` | The artifacts seed; that a debated artifact can't support a claim; that photos need a license; Wikidata date and photo parsing; that the import never overwrites curated text; and that the static export matches the API exactly. Uses fake Wikidata and Commons responses, never the network |
 | `test_import.py` | A full Douay-Rheims import. Skipped unless `data/DRC.json` exists |
 
 ## Other files
