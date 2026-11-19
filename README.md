@@ -99,7 +99,7 @@ Pushing to `main` deploys everything:
 
 - **Website:** Cloudflare Workers rebuilds from `frontend/`. Build variables: `VITE_API_URL`, `VITE_FORMSPREE_ID`.
 - **API:** Render rebuilds the Docker image from `backend/`. Environment: `NEON_DATABASE_URL`, `CORS_ORIGINS`, `API_BIBLE_KEY`.
-- **Database changes:** run `alembic upgrade head` from `backend/` against Neon. This doesn't happen automatically.
+- **Database changes:** run `alembic upgrade head` from `backend/` against Neon, or run the **Migrate database** workflow from the Actions tab (use this if your network blocks Neon's port 5432). This doesn't happen automatically.
 
 DEPLOY.md describes a Google Cloud Run setup, kept for reference; it isn't the live setup.
 

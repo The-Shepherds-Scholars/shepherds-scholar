@@ -87,6 +87,11 @@ from the Actions tab with "Run workflow". It:
 It needs the `NEON_DATABASE_URL` secret, and permission to push to `main`. If `main` is ever
 protected, allow `github-actions[bot]` to push or the commit step will fail.
 
+To apply migrations without your own computer, run the **Migrate database** workflow
+(`.github/workflows/migrate.yml`) from the Actions tab. It runs `alembic upgrade head` against Neon,
+then `scripts.seed_artifacts`. Use it when your network blocks Neon's database port (5432); many
+school and office networks do, and the connection then hangs or is refused.
+
 Render also redeploys on each of these commits even though only website files changed. That is
 harmless, but you can stop it in Render under Settings > Build Filters by including only
 `backend/**`.
