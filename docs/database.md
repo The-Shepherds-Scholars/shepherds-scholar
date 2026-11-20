@@ -52,6 +52,40 @@ These hold the site's research content. They're empty until content is entered.
 Search indexes are set up for event text (full-text) and for fuzzy matches on event titles, people,
 and place names (`pg_trgm`), for the search page.
 
+## Artifacts (from `artifacts`)
+
+An artifact shows that the world of the Bible was real: its people, places, and customs. No object
+proves a matter of faith, and the tables are built so the site can't present one that way.
+
+| Table | Holds | Why it's designed this way |
+|---|---|---|
+| `artifacts` | Name, type (`inscription`, `coin`, `ossuary`, `building`, `manuscript`, `object`), a description, what it shows (`significance`), draft or checked status, authenticity and a note on it, year discovered, find site (`found_at_place_id`) and find coordinates, date range in astronomical years with a label, museum and its link, photo with license, credit, and Commons page, and where the row came from (`curated`, or `wikidata` with the Wikidata id) | 7 curated artifacts to start. Wikidata imports are added weekly. Mirrors `places`: the import never overwrites a curated row, and one Wikidata item can only be in the table once |
+| `claim_artifacts` | Which artifacts bear on which claims, using the same roles as `claim_sources` (states, supports, contextualizes, challenges, discusses), with a note | Shows which finds support a claim and which only give context |
+
+**Authenticity** is one of:
+
+| Value | Meaning | On the site |
+|---|---|---|
+| `accepted` | Scholars accept the object as genuine | Shown normally |
+| `debated` | Its genuineness, or the part that matters (such as an inscription), is disputed. The James ossuary is the example | Labeled as debated; never shown as proof |
+| `forgery` | Shown to be fake | Kept so the site can say so |
+| `unreviewed` | Imported from Wikidata and not yet checked by a person | "Being checked" |
+
+Rules the database enforces:
+
+- Only an `accepted` artifact can `state` or `support` a claim. A trigger blocks such a link to any
+  other artifact, and also blocks changing a linked artifact away from `accepted` until its links
+  are changed.
+- A photo can't be stored without its license and the link to its Commons page.
+- If a find spot has coordinates, both latitude and longitude are set. When it has none, the site
+  uses the find site's location.
+
+To mark an artifact checked after reviewing it against sources:
+
+```sql
+UPDATE artifacts SET notes_status = 'checked', authenticity = 'accepted' WHERE slug = 'pilate-stone';
+```
+
 ## Scripture text and caching (from `scripture_text_cache` and later)
 
 | Table | Holds | Why it's designed this way |
@@ -77,7 +111,11 @@ and place names (`pg_trgm`), for the search page.
 
 - The free plan pauses the database after a few idle minutes; the next connection wakes it in
   about a second.
-- Use the **pooled** connection string (its host contains `-pooler`) for the app.
+- Use the **pooled** connection string (its host contains `-pooler`) for the app, in Render's
+  `NEON_DATABASE_URL`. Neon's pooler handles many more connections than the database itself, so a
+  busy moment doesn't run out of connections.
+- The map's places and artifacts are read from static files on Cloudflare, not from Neon, so visits
+  to the map don't use Neon's free compute hours. Only the weekly export reads them from Neon.
 - For risky work or tests, create a branch (`neon branches create --name test`); it's a full copy
   you can wipe and delete without touching `main`.
 - Never run the tests against `main`: they delete every table first.

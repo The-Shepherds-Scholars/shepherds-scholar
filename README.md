@@ -88,6 +88,9 @@ Where things are: `backend/` is the FastAPI API, `frontend/` is the React site, 
     python -m scripts.seed_places                          # the map's five featured places
     # every other place in the Bible, from OpenBible.info (download commands in the script):
     python -m scripts.import_openbible_places data/openbible/ancient.jsonl data/openbible/modern.jsonl
+    python -m scripts.seed_artifacts                       # 7 hand-picked artifacts (after the places)
+    python -m scripts.import_wikidata_artifacts            # photos for them, plus finds from Wikidata
+    python -m scripts.export_static_data                   # optional: map data as static files for the site
     uvicorn app.main:app --reload              # http://localhost:8000/docs
 
 ## Deploy
@@ -96,7 +99,7 @@ Pushing to `main` deploys everything:
 
 - **Website:** Cloudflare Workers rebuilds from `frontend/`. Build variables: `VITE_API_URL`, `VITE_FORMSPREE_ID`.
 - **API:** Render rebuilds the Docker image from `backend/`. Environment: `NEON_DATABASE_URL`, `CORS_ORIGINS`, `API_BIBLE_KEY`.
-- **Database changes:** run `alembic upgrade head` from `backend/` against Neon. This doesn't happen automatically.
+- **Database changes:** run `alembic upgrade head` from `backend/` against Neon, or run the **Migrate database** workflow from the Actions tab (use this if your network blocks Neon's port 5432). This doesn't happen automatically.
 
 DEPLOY.md describes a Google Cloud Run setup, kept for reference; it isn't the live setup.
 
@@ -107,6 +110,10 @@ They run every morning in GitHub Actions (the **Daily jobs** workflow; needs the
 
     python -m app.jobs.fetch_daily_readings    # Mass readings for today and the week ahead
     python -m app.jobs.refresh_passage_cache   # API.Bible text; needs API_BIBLE_KEY
+
+The **Weekly data** workflow runs on Mondays. It imports artifacts from Wikidata, exports the map's
+places and artifacts to `frontend/public/data/`, and commits those files if they changed, which
+redeploys the site. See [docs/backend.md](docs/backend.md#weekly-data).
 
 ## Tests
 

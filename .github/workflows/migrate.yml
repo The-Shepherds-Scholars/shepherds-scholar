@@ -1,0 +1,46 @@
+name: Migrate database
+
+# Applies new migrations to Neon, then loads the hand-picked artifacts. Run it by hand from the
+# Actions tab after pushing a new migration. Useful when your own network blocks Neon's database
+# port (5432), as many school and office networks do. Safe to re-run: both steps skip work already done.
+# Secret: NEON_DATABASE_URL.
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: weekly-data   # never at the same time as the weekly import and export
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
+
+      - name: Install the backend
+        run: pip install .
+
+      - name: Apply migrations
+        run: |
+          if [ -z "$NEON_DATABASE_URL" ]; then
+            echo "::error::Add the NEON_DATABASE_URL secret in Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+          echo "Before: $(alembic current)"
+          alembic upgrade head
+          echo "After: $(alembic current)"
+
+      - name: Load the hand-picked artifacts
+        run: python -m scripts.seed_artifacts
