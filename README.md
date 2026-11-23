@@ -7,7 +7,7 @@ Catholic faith and biblical history, side by side, with every statement labeled.
 
 > **Work in progress.** The home page, daily readings, the Guide to Mass, Miracles, Angels and demons,
 > Support a parish, Sources, Contact, and About me pages are up.
-> The then-and-now map has every place in the Bible (1,300+, from OpenBible.info), five with hand-written notes. The timeline, search, and guided pathways are still placeholders, and the research content
+> The then-and-now map has every place in the Bible (1,300+, from OpenBible.info), five with hand-written notes, plus archaeological finds such as the Pilate Stone. The timeline, search, and guided pathways are still placeholders, and the research content
 > (events, sources, miracle records) hasn't been entered yet.
 > Glossary definitions and faith pages are drafts awaiting review by the Church before launch.
 > The API runs on a free plan, so the first visit after a quiet spell can take up to a minute.

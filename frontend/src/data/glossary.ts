@@ -381,6 +381,74 @@ export const GLOSSARY = {
     icon: BookOpen,
   },
 
+  // ---- Archaeological finds: artifact types (artifacts.artifact_type) ---------------------------
+  artInscription: {
+    term: "Inscription",
+    definition: "Words carved or written on stone, metal, or clay, such as a dedication, a warning, or a name on a tomb.",
+    moreInfo: "Inscriptions are some of the strongest evidence from the ancient world, because they were written at the time and name real people and places.",
+    icon: BookOpen,
+    url: "https://en.wikipedia.org/wiki/Epigraphy",
+  },
+  artCoin: {
+    term: "Coin",
+    definition: "Money from the ancient world. A coin’s images and words show who ruled when it was made.",
+    moreInfo: "Coins can often be dated to within a few years, so they help date the places where they are found.",
+    icon: BookOpen,
+    url: "https://en.wikipedia.org/wiki/Numismatics",
+  },
+  artOssuary: {
+    term: "Ossuary",
+    definition: "A stone box for the bones of the dead. Jewish families in and around Jerusalem used them from about 20 BC to AD 70.",
+    moreInfo: "About a year after burial, the family gathered the bones into an ossuary. Some have the dead person’s name carved on the side.",
+    icon: BookOpen,
+    url: "https://en.wikipedia.org/wiki/Ossuary",
+  },
+  artBuilding: {
+    term: "Building",
+    definition: "The excavated remains of a structure, such as a synagogue, house, wall, or water system.",
+    moreInfo: "Remains often show several building periods, one on top of another, so the date shown is for the part described.",
+    icon: Church,
+  },
+  artManuscript: {
+    term: "Manuscript",
+    definition: "A text copied by hand, such as a scroll or an early book of Scripture.",
+    moreInfo: "Ancient manuscripts let scholars see how the biblical text was copied and passed down.",
+    icon: BookOpen,
+    url: "https://en.wikipedia.org/wiki/Biblical_manuscript",
+  },
+  artObject: {
+    term: "Object",
+    definition: "A find that isn’t an inscription, coin, ossuary, building, or manuscript, such as a carved stone, tool, or vessel.",
+    moreInfo: "The description explains what the object is and why it matters.",
+    icon: BookOpen,
+  },
+
+  // ---- Archaeological finds: how sure scholars are it is genuine (artifacts.authenticity) -------
+  authAccepted: {
+    term: "Accepted as genuine",
+    definition: "Scholars agree this find is authentic: it really is as old as it seems, and it was found where it is said to be.",
+    moreInfo: "Genuine means the object is real. What it shows is a separate question, which is why each find says what it shows and nothing more.",
+    icon: BookOpen,
+  },
+  authDebated: {
+    term: "Debated",
+    definition: "Experts disagree about whether this find, or part of it, is genuine.",
+    moreInfo: "A debated find is never used as evidence for a statement on this site. It can only give background.",
+    icon: BookOpen,
+  },
+  authForgery: {
+    term: "Forgery",
+    definition: "Most experts conclude this was made, or altered, in modern times to look ancient.",
+    moreInfo: "Forgeries are shown so you know about them, but they are never used as evidence.",
+    icon: BookOpen,
+  },
+  authUnreviewed: {
+    term: "Not yet reviewed",
+    definition: "This find was added from an open database and no one on this site has checked it yet.",
+    moreInfo: "Until it is reviewed, it isn’t used as evidence for anything on the site.",
+    icon: BookOpen,
+  },
+
   // ---- The six claim labels (claims.claim_type) ----------------------------------------------
   claimScripture: {
     term: "Scripture",

@@ -30,7 +30,8 @@ const SOURCES: Array<{ name: string; url: string; provides: ReactNode; license: 
   { name: 'Digital Atlas of the Roman Empire', url: 'https://dh.gu.se/dare/', provides: 'The Roman-era map', license: 'CC BY 4.0, per the most recent notice', checking: true },
   { name: 'OpenStreetMap contributors', url: 'https://www.openstreetmap.org/copyright', provides: 'Today’s map, and the churches on the Support a parish map (searched through the Overpass API), and finding a typed address (Nominatim, with suggestions from Photon by Komoot)', license: 'ODbL' },
   { name: 'Leaflet', url: 'https://leafletjs.com', provides: 'The interactive maps', license: 'BSD 2-Clause' },
-  { name: 'Wikidata', url: 'https://www.wikidata.org', provides: 'Linked facts about people and places', license: 'CC0', planned: true },
+  { name: 'Wikidata', url: 'https://www.wikidata.org', provides: 'Archaeological finds on the then-and-now map, and the museum and find spot of hand-picked ones', license: 'CC0' },
+  { name: 'Wikimedia Commons', url: 'https://commons.wikimedia.org', provides: 'Photos of archaeological finds, linked rather than copied, each credited with its photographer and license', license: 'Per photo, often CC BY or CC BY-SA' },
   { name: 'OpenAlex', url: 'https://openalex.org', provides: 'Finding scholarly research', license: 'CC0', planned: true },
   { name: 'catholic-mass-readings (Python package)', url: 'https://pypi.org/project/catholic-mass-readings/', provides: <>Reads the <ScholarDefinition term="usccb" /> readings page once a day</>, license: 'Open source (Apache 2.0)' },
 ];

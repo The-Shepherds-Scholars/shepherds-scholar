@@ -3,16 +3,21 @@ import { Link, useSearchParams } from 'react-router-dom';
 import GlossaryText from '../components/GlossaryText';
 import ScholarDefinition from '../components/ScholarDefinition';
 import Skeleton from '../components/Skeleton';
-import { BeingChecked, ComingSoonNote } from '../components/StatusTag';
+import { BeingChecked, ComingSoon } from '../components/StatusTag';
+import ArtifactPanel, { FindList } from '../components/ArtifactPanel';
+import { countByPlace, onMap, useArtifacts, type Artifact } from '../lib/artifacts';
 import { PassageText } from '../features/scripture/PassageText';
 import { CONFIDENCE, placeLabel, usePlace, usePlaces, type Candidate, type PlaceSummary } from '../lib/places';
 
 // The Holy Land, then and now: wireframe 4 and design concept page 3.
 // Every place named in the Bible (1,300+, from OpenBible.info) is a dot on the map; clicking a dot,
 // a featured chip, or a search result focuses the map on that place and opens it in the panel.
-// MapCompare (Leaflet) loads only on this page. The selected place lives in ?place= so it can be shared.
+// Archaeological finds are gold diamonds; choosing one opens it in the panel instead of a place.
+// MapCompare (Leaflet) loads only on this page. The selection lives in ?place= or ?artifact= so it
+// can be shared.
 const MapCompare = lazy(() => import('../components/MapCompare'));
 const NO_CANDIDATES: Candidate[] = [];
+const NO_FINDS: Artifact[] = [];
 const FIRST_VERSES = 8;
 
 export default function MapPage() {
@@ -20,11 +25,21 @@ export default function MapPage() {
   const places = usePlaces();
   const all = places.data ?? [];
   const featured = useMemo(() => all.filter((p) => p.featured_order !== null), [all]);
-  const selected = params.get('place') ?? featured[0]?.slug ?? null;
+  const artifacts = useArtifacts();
+  const finds = artifacts.data ?? NO_FINDS;
+  const [showFinds, setShowFinds] = useState(true);
+  const selectedFind = params.get('artifact');
+  const selected = selectedFind ? null : (params.get('place') ?? featured[0]?.slug ?? null);
   const place = usePlace(selected);
   const candidates = place.data?.slug === selected ? place.data.candidates : NO_CANDIDATES;
+  const findCounts = useMemo(() => countByPlace(finds), [finds]);
+  const offMap = useMemo(() => finds.filter((a) => !onMap(a)), [finds]);
+  // An open find that belongs to a place lights up that place's dot.
+  const findPlace = selectedFind ? (finds.find((a) => a.slug === selectedFind)?.place_slug ?? null) : null;
+  const mapSelected = selectedFind ? findPlace : selected;
 
   const select = useCallback((slug: string) => setParams({ place: slug }, { replace: true }), [setParams]);
+  const selectFind = useCallback((slug: string) => setParams({ artifact: slug }, { replace: true }), [setParams]);
 
   return (
     <main>
@@ -43,17 +58,20 @@ export default function MapPage() {
       >
         <div>
           <Suspense fallback={<Skeleton height={460} delayMs={0} />}>
-            <MapCompare places={all} selected={selected} candidates={candidates} onSelect={select} />
+            <MapCompare
+              places={all} selected={mapSelected} candidates={candidates} onSelect={select}
+              finds={showFinds ? finds : NO_FINDS} selectedFind={selectedFind} onSelectFind={selectFind}
+            />
           </Suspense>
           <p className="small-note" style={{ marginTop: 10 }}>
             Drag the round handle across the map to compare. Left of it is the Roman era, right of it is today. With
-            a keyboard, focus the handle and use the arrow keys. Click any dot to focus on that place.
+            a keyboard, focus the handle and use the arrow keys. Click any dot to focus on that place; the place you
+            have open is the large blue dot.
           </p>
-          <ComingSoonNote title="Archaeological finds and artifacts">
-            Inscriptions, excavations, and objects that shed light on the Bible, such as the Pilate Stone at Caesarea or
-            the Pool of Siloam in Jerusalem, aren’t on the map yet. Each will show where it was found, what it shows,
-            and what it doesn’t, with its sources.
-          </ComingSoonNote>
+          <FindsSection
+            count={finds.length} offMap={offMap} show={showFinds} onShow={setShowFinds}
+            pending={artifacts.isPending} error={artifacts.isError} selected={selectedFind} onSelect={selectFind}
+          />
         </div>
 
         <section className="card" style={{ padding: 24 }}>
@@ -61,12 +79,16 @@ export default function MapPage() {
           {places.isError && <p>The places couldn’t be loaded. The server may be waking up, so try again in a minute.</p>}
           {all.length > 0 && (
             <>
-              <PlaceSearch places={all} onSelect={select} />
+              <PlaceSearch places={all} findCounts={findCounts} onSelect={select} />
               <PlaceChips places={featured} selected={selected} onSelect={select} />
             </>
           )}
           <div aria-live="polite">
-            <PlacePanel slug={selected} />
+            {selectedFind ? (
+              <ArtifactPanel slug={selectedFind} artifacts={finds} pending={artifacts.isPending} onSelect={selectFind} onSelectPlace={select} />
+            ) : (
+              <PlacePanel slug={selected} finds={finds} onSelectFind={selectFind} />
+            )}
           </div>
         </section>
       </div>
@@ -74,7 +96,7 @@ export default function MapPage() {
   );
 }
 
-function PlaceSearch({ places, onSelect }: { places: PlaceSummary[]; onSelect: (s: string) => void }) {
+function PlaceSearch({ places, findCounts, onSelect }: { places: PlaceSummary[]; findCounts: Map<string, number>; onSelect: (s: string) => void }) {
   const [query, setQuery] = useState('');
   const inputId = useId();
   const q = query.trim().toLowerCase();
@@ -117,6 +139,9 @@ function PlaceSearch({ places, onSelect }: { places: PlaceSummary[]; onSelect: (
               >
                 {placeLabel(p)}
                 {p.latitude === null && <span className="small-note"> · not on the map</span>}
+                {(findCounts.get(p.slug) ?? 0) > 0 && (
+                  <span className="small-note"> · {findCounts.get(p.slug) === 1 ? '1 find' : `${findCounts.get(p.slug)} finds`}</span>
+                )}
               </button>
             </li>
           ))}
@@ -151,7 +176,44 @@ function PlaceChips({ places, selected, onSelect }: { places: PlaceSummary[]; se
   );
 }
 
-function PlacePanel({ slug }: { slug: string | null }) {
+/** The finds layer: a toggle, a word on what a find can and can't show, and finds with no map point. */
+function FindsSection(props: {
+  count: number; offMap: Artifact[]; show: boolean; onShow: (v: boolean) => void;
+  pending: boolean; error: boolean; selected: string | null; onSelect: (slug: string) => void;
+}) {
+  const { count, offMap, show, onShow, pending, error, selected, onSelect } = props;
+  const toggleId = useId();
+  return (
+    <section className="card" style={{ marginTop: 16, padding: '16px 20px' }} aria-labelledby={`${toggleId}-h`}>
+      <h2 id={`${toggleId}-h`} style={{ margin: 0, fontSize: 20 }}>Archaeological finds</h2>
+      <p style={{ margin: '8px 0 0', fontSize: 16 }}>
+        A gold dot is a place with finds, such as an{' '}
+        <ScholarDefinition term="artInscription">inscription</ScholarDefinition> or a building: choose it to see them
+        next to its Scripture verses. A gold diamond marks a find that isn’t tied to a place in the Bible. A find can show that a person, place, or custom was real. It can’t prove
+        a matter of faith, so each one says what it shows and how sure scholars are that it is genuine.
+      </p>
+      {pending && <Skeleton height={24} />}
+      {error && <p className="small-note">The finds couldn’t be loaded. Try again in a minute.</p>}
+      {count > 0 && (
+        <label htmlFor={toggleId} style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, minHeight: 32, cursor: 'pointer' }}>
+          <input id={toggleId} type="checkbox" checked={show} onChange={(e) => onShow(e.target.checked)} style={{ width: 18, height: 18 }} />
+          Show {count === 1 ? 'the find' : `all ${count} finds`} on the map (gold dots and diamonds)
+        </label>
+      )}
+      {offMap.length > 0 && (
+        <div style={{ marginTop: 12 }}>
+          <h3 style={subhead}>Not on the map (find spot unknown)</h3>
+          <FindList finds={offMap} selected={selected} onSelect={onSelect} />
+        </div>
+      )}
+      <p className="small-note" style={{ margin: '12px 0 0' }}>
+        <ComingSoon label="More coming" /> More finds are being added, with photos and museum links.
+      </p>
+    </section>
+  );
+}
+
+function PlacePanel({ slug, finds, onSelectFind }: { slug: string | null; finds: Artifact[]; onSelectFind: (slug: string) => void }) {
   const { data: place, isPending, isError } = usePlace(slug);
   const [openPassage, setOpenPassage] = useState<string | null>(null);
   const [showAllVerses, setShowAllVerses] = useState(false);
@@ -175,6 +237,7 @@ function PlacePanel({ slug }: { slug: string | null }) {
   if (isError || !place) return <p style={{ marginTop: 20 }}>This place couldn’t be loaded. Please try again.</p>;
 
   const conf = CONFIDENCE[place.location_confidence];
+  const here = finds.filter((a) => a.place_slug === place.slug);
   const imported = place.data_source === 'openbible';
   const verses = showAllVerses ? place.passages : place.passages.slice(0, FIRST_VERSES);
 
@@ -257,6 +320,13 @@ function PlacePanel({ slug }: { slug: string | null }) {
               <PassageText passageId={openPassage} />
             </div>
           )}
+        </section>
+      )}
+
+      {here.length > 0 && (
+        <section style={{ marginTop: 18 }}>
+          <h3 style={subhead}>Finds from here</h3>
+          <FindList finds={here} selected={null} onSelect={onSelectFind} />
         </section>
       )}
 
