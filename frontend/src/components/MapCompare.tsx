@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { ChevronsLeftRight } from 'lucide-react';
 import Skeleton from './Skeleton';
 import { placeLabel, type Candidate, type PlaceSummary } from '../lib/places';
+import { countByPlace, groupBySpot, type Artifact } from '../lib/artifacts';
 
 // The swipe map from wireframe 4 / design concept page 3: one Leaflet map with two tile layers.
 // Today's map (OpenStreetMap) fills the map; the Roman-era map (DARE) sits on top and is clipped to
@@ -27,15 +28,21 @@ interface Props {
   selected: string | null;
   candidates: Candidate[]; // candidates of the selected place, if any
   onSelect: (slug: string) => void;
+  // Archaeological finds. A find that belongs to a place in the Bible is joined to that place's dot
+  // (a gold dot, and the place panel lists it). Only finds with no Bible place get a diamond.
+  finds?: Artifact[];
+  selectedFind?: string | null;
+  onSelectFind?: (slug: string) => void;
 }
 
-export default function MapCompare({ places, selected, candidates, onSelect }: Props) {
+export default function MapCompare({ places, selected, candidates, onSelect, finds = NO_FINDS, selectedFind = null, onSelectFind }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const mapEl = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const roman = useRef<L.TileLayer | null>(null);
   const placeLayer = useRef<L.LayerGroup | null>(null);
   const candidateLayer = useRef<L.LayerGroup | null>(null);
+  const findLayer = useRef<L.LayerGroup | null>(null);
   const pctRef = useRef(0.6);
   const [pct, setPct] = useState(0.6);
   const [loaded, setLoaded] = useState(false);
@@ -44,8 +51,16 @@ export default function MapCompare({ places, selected, candidates, onSelect }: P
   // Keep the latest onSelect in a ref, so markers don't need rebuilding when the parent re-renders.
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
+  const onSelectFindRef = useRef(onSelectFind);
+  onSelectFindRef.current = onSelectFind;
   const markers = useRef(new Map<string, L.CircleMarker>());
   const selectedRef = useRef<string | null>(null);
+
+  // How many finds each place has, for the gold dot and the tooltip. Kept in a ref too, so the
+  // restyle effect below reads the latest counts.
+  const findCounts = useMemo(() => countByPlace(finds), [finds]);
+  const findCountsRef = useRef(findCounts);
+  findCountsRef.current = findCounts;
 
   // Create the map once. Markers are drawn on a canvas, which keeps 1,300+ dots fast.
   useEffect(() => {
@@ -63,6 +78,7 @@ export default function MapCompare({ places, selected, candidates, onSelect }: P
     roman.current = r;
     placeLayer.current = L.layerGroup().addTo(m);
     candidateLayer.current = L.layerGroup().addTo(m);
+    findLayer.current = L.layerGroup().addTo(m);
     m.on('move zoom resize', () => clip(m, r, pctRef.current));
     map.current = m;
     clip(m, r, pctRef.current);
@@ -86,15 +102,18 @@ export default function MapCompare({ places, selected, candidates, onSelect }: P
     markers.current.clear();
     for (const p of places) {
       if (p.latitude === null || p.longitude === null) continue;
-      const marker = L.circleMarker([p.latitude, p.longitude], markerStyle(p, p.slug === selectedRef.current))
-        .bindTooltip(placeLabel(p))
+      const n = findCounts.get(p.slug) ?? 0;
+      const marker = L.circleMarker([p.latitude, p.longitude], markerStyle(p, p.slug === selectedRef.current, n > 0))
+        .bindTooltip(n > 0 ? `${placeLabel(p)} · ${n === 1 ? '1 find' : `${n} finds`}` : placeLabel(p))
         .on('click', () => onSelectRef.current(p.slug))
         .addTo(layer);
       markers.current.set(p.slug, marker);
     }
+    // Places with finds sit above plain dots, and the selected place above both.
+    for (const slug of findCounts.keys()) markers.current.get(slug)?.bringToFront();
     const sel = selectedRef.current && markers.current.get(selectedRef.current);
     if (sel) sel.bringToFront();
-  }, [places]);
+  }, [places, findCounts]);
 
   // Restyle only the previously selected and newly selected dots.
   useEffect(() => {
@@ -103,12 +122,12 @@ export default function MapCompare({ places, selected, candidates, onSelect }: P
     const bySlug = new Map(places.map((p) => [p.slug, p]));
     if (prev && prev !== selected) {
       const p = bySlug.get(prev);
-      if (p) markers.current.get(prev)?.setStyle(markerStyle(p, false));
+      if (p) markers.current.get(prev)?.setStyle(markerStyle(p, false, findCountsRef.current.has(prev)));
     }
     if (selected) {
       const p = bySlug.get(selected);
       const marker = markers.current.get(selected);
-      if (p && marker) marker.setStyle(markerStyle(p, true)).bringToFront();
+      if (p && marker) marker.setStyle(markerStyle(p, true, findCountsRef.current.has(selected))).bringToFront();
     }
   }, [selected, places]);
 
@@ -145,6 +164,49 @@ export default function MapCompare({ places, selected, candidates, onSelect }: P
     // candidateKey stands in for candidates, whose array identity changes on every load.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected, candidateKey, places]);
+
+  // Finds with no Bible place: one diamond per find spot. Finds at the same spot share a marker; clicking
+  // it opens the first, and the panel lists the others. Built from the data alone, so any new
+  // artifact (hand-picked or imported) appears with no code change.
+  const groups = useMemo(() => groupBySpot(finds.filter((a) => !a.place_slug)), [finds]);
+  useEffect(() => {
+    const layer = findLayer.current;
+    if (!layer) return;
+    layer.clearLayers();
+    for (const g of groups) {
+      const on = g.items.some((a) => a.slug === selectedFind);
+      const names = g.items.map((a) => a.name).join(', ');
+      const label = g.items.length > 1 ? `${g.items.length} finds: ${names}` : `Find: ${names}`;
+      // A second click on a shared marker moves to the next find there.
+      const open = () => {
+        const i = g.items.findIndex((a) => a.slug === selectedFind);
+        onSelectFindRef.current?.(g.items[(i + 1) % g.items.length].slug);
+      };
+      L.marker([g.latitude, g.longitude], { icon: findIcon(on, g.items.length), title: label, alt: label, zIndexOffset: on ? 1000 : 500, riseOnHover: true })
+        .bindTooltip(label)
+        .on('click', open)
+        // Leaflet makes markers focusable but doesn't turn Enter into a click, so do it here.
+        .on('keypress', (e: L.LeafletKeyboardEvent) => {
+          if (e.originalEvent.key === 'Enter' || e.originalEvent.key === ' ') {
+            e.originalEvent.preventDefault();
+            open();
+          }
+        })
+        .addTo(layer);
+    }
+  }, [groups, selectedFind]);
+
+  // Focus the map on the selected find.
+  useEffect(() => {
+    const m = map.current;
+    if (!m || !selectedFind) return;
+    const a = finds.find((x) => x.slug === selectedFind);
+    // A find joined to a place is focused through that place's dot instead.
+    if (!a || a.place_slug || a.latitude === null || a.longitude === null) return;
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) m.setView([a.latitude, a.longitude], 10);
+    else m.flyTo([a.latitude, a.longitude], 10, { duration: 0.8 });
+  }, [selectedFind, finds]);
 
   function pctFromClientX(clientX: number) {
     const rect = wrapRef.current!.getBoundingClientRect();
@@ -238,15 +300,42 @@ const STAR_ICON = L.divIcon({
     '<path d="M12 5.5l1.9 4 4.4.5-3.3 3 .9 4.3L12 15.2 8.1 17.3l.9-4.3-3.3-3 4.4-.5z" fill="#6B1E3A"/></svg>',
 });
 
-/** Featured places get large dots; the 1,300+ imported places get small ones. */
-function markerStyle(p: PlaceSummary, selected: boolean): L.CircleMarkerOptions {
+const NO_FINDS: Artifact[] = [];
+const FIND_GOLD = '#d4a017'; // places with finds, and find diamonds
+const SELECTED_BLUE = '#1565d8'; // the open place or find: a color no other marker uses
+
+/** A gold diamond for a find spot, with a count when several finds share it. */
+function findIcon(selected: boolean, count: number): L.DivIcon {
+  const size = selected ? 28 : 20;
+  const badge = count > 1
+    ? `<span style="position:absolute;top:-8px;right:-10px;min-width:16px;height:16px;padding:0 3px;border-radius:8px;background:#3b2a1e;color:#fff;font:600 11px/16px system-ui,sans-serif;text-align:center">${count}</span>`
+    : '';
+  return L.divIcon({
+    className: '',
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+    html:
+      `<span style="position:relative;display:block;width:${size}px;height:${size}px">` +
+      `<svg width="${size}" height="${size}" viewBox="0 0 24 24" aria-hidden="true">` +
+      `<path d="M12 1.5 22.5 12 12 22.5 1.5 12z" fill="${selected ? SELECTED_BLUE : FIND_GOLD}" stroke="#fff" stroke-width="2"/></svg>` +
+      badge + '</span>',
+  });
+}
+
+/**
+ * Featured places get large dots; the 1,300+ imported places get small ones. A place with
+ * archaeological finds is a larger gold dot, so its finds stand out without a separate marker.
+ */
+function markerStyle(p: PlaceSummary, selected: boolean, hasFinds = false): L.CircleMarkerOptions {
   const featured = p.featured_order !== null;
+  if (selected) return { radius: 12, color: '#fff', weight: 4, fillColor: SELECTED_BLUE, fillOpacity: 1 };
+  const base = featured ? 7 : 4;
   return {
-    radius: selected ? 10 : featured ? 7 : 4,
+    radius: hasFinds ? Math.max(base, 8) : base,
     color: '#fff',
-    weight: selected ? 3 : featured ? 2 : 1,
-    fillColor: selected ? '#A3282E' : '#6B1E3A',
-    fillOpacity: featured || selected ? 1 : 0.85,
+    weight: hasFinds ? 3 : featured ? 2 : 1,
+    fillColor: hasFinds ? FIND_GOLD : '#6B1E3A',
+    fillOpacity: featured || selected || hasFinds ? 1 : 0.85,
   };
 }
 

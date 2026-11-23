@@ -20,6 +20,10 @@ const PHRASES: Array<[string, GlossaryTerm]> = [
   ['Mass', 'mass'],
   ['stadia', 'stadia'],
   ['Crusader', 'crusades'],
+  ['ossuary', 'artOssuary'],
+  ['Ossuary', 'artOssuary'],
+  ['inscription', 'artInscription'],
+  ['Inscription', 'artInscription'],
 ];
 
 const PATTERN = new RegExp(`\\b(${PHRASES.map(([p]) => p).join('|')})\\b`, 'g');
