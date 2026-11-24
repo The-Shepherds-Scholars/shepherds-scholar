@@ -5,9 +5,13 @@
 Run by the weekly "Weekly data" GitHub Actions workflow, never while a visitor waits. Safe to re-run.
 
 What it does:
-  1. For every place with a wikidata_id, asks the Wikidata Query Service for items whose "location of
+  1. For every place with a wikidata_id inside REGION (the Holy Land and its neighbors), asks the Wikidata Query Service for items whose "location of
      discovery" (P189) is that place and that have an "inception" date (P571). Items dated outside
-     YEAR_MIN..YEAR_MAX (Bible times through the early Church) are skipped.
+     YEAR_MIN..YEAR_MAX (Bible times through the early Church) are skipped, and so are items whose
+     own coordinates fall outside REGION. Places farther away (Egypt, Mesopotamia, Rome) are left
+     out on purpose: Wikidata lists thousands of museum objects from them that say nothing about
+     the Bible, and every visitor would download them. Finds from those places can be added by hand.
+     Items with no English name are skipped too.
   2. Saves them with data_source='wikidata' and authenticity='unreviewed', so the site shows them as
      "Being checked" until a person reviews each one. Matched by Wikidata id (source_ref).
   3. Fills the EMPTY fields of curated artifacts (photo, museum, find spot, year found) from Wikidata.
@@ -36,6 +40,10 @@ YEAR_MIN, YEAR_MAX = -3000, 700  # astronomical years
 BATCH = 40  # places per query
 PAUSE = 1.0  # seconds between queries
 IMAGE_WIDTH = 640
+# Where finds are imported from: (south, west, north, east) in degrees. Covers Israel, the
+# Palestinian territories, western Jordan, southern Lebanon and Syria (Tyre, Sidon, Byblos,
+# Damascus), and the northern Sinai. Widen it here; the next weekly run imports the new area.
+REGION = (29.5, 33.8, 34.5, 37.0)
 
 # Finds at these places. Rows repeat per type/collection/image; parse() merges them per item.
 FINDS_QUERY = """
@@ -190,6 +198,14 @@ def parse(bindings: list[dict]) -> dict[str, WikidataItem]:
     return items
 
 
+def in_region(lat: float | None, lon: float | None) -> bool:
+    """True when a point is inside REGION. A missing point counts as inside (the place decides)."""
+    if lat is None or lon is None:
+        return True
+    south, west, north, east = REGION
+    return south <= lat <= north and west <= lon <= east
+
+
 def in_range(it: WikidataItem) -> bool:
     if it.earliest_year is None or it.latest_year is None:
         return False
@@ -259,7 +275,9 @@ def fetch(client: httpx.Client, place_qids: list[str], curated_qids: list[str]) 
             print(f"Batch {i // BATCH + 1} failed: {e}", file=sys.stderr)
             complete = False
         time.sleep(PAUSE)
-    finds = {q: it for q, it in finds.items() if in_range(it)}
+    # An item with no English label comes back named by its id ("Q16963764"): nothing to show a visitor.
+    finds = {q: it for q, it in finds.items()
+             if in_range(it) and in_region(it.lat, it.lon) and not QID.match(it.name)}
     details = parse(sparql(client, DETAILS_QUERY % " ".join(f"wd:{q}" for q in curated_qids))) if curated_qids else {}
 
     files = sorted({it.image_file for it in [*finds.values(), *details.values()] if it.image_file})
@@ -355,8 +373,12 @@ def main() -> None:
     from app.core.database import engine
 
     with engine.connect() as conn:
-        place_qids = sorted(set(conn.execute(text(
-            "SELECT wikidata_id FROM places WHERE wikidata_id IS NOT NULL")).scalars()))
+        south, west, north, east = REGION
+        place_qids = sorted(set(conn.execute(text("""
+            SELECT wikidata_id FROM places
+            WHERE wikidata_id IS NOT NULL
+              AND latitude BETWEEN :south AND :north AND longitude BETWEEN :west AND :east
+        """), {"south": south, "north": north, "west": west, "east": east}).scalars()))
         curated_qids = sorted(conn.execute(text(
             "SELECT wikidata_id FROM artifacts WHERE data_source = 'curated' AND wikidata_id IS NOT NULL")).scalars())
     # Fetch everything before opening the write transaction, so Neon isn't held open while waiting on Wikidata.
