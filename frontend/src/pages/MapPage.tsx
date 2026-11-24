@@ -28,12 +28,19 @@ export default function MapPage() {
   const artifacts = useArtifacts();
   const finds = artifacts.data ?? NO_FINDS;
   const [showFinds, setShowFinds] = useState(true);
+  // Finds imported automatically and not yet checked by a person stay off the map unless asked for.
+  const [showUnreviewed, setShowUnreviewed] = useState(false);
+  const unreviewedCount = useMemo(() => finds.filter((a) => a.authenticity === 'unreviewed').length, [finds]);
+  const visible = useMemo(
+    () => (showUnreviewed ? finds : finds.filter((a) => a.authenticity !== 'unreviewed')),
+    [finds, showUnreviewed],
+  );
   const selectedFind = params.get('artifact');
   const selected = selectedFind ? null : (params.get('place') ?? featured[0]?.slug ?? null);
   const place = usePlace(selected);
   const candidates = place.data?.slug === selected ? place.data.candidates : NO_CANDIDATES;
-  const findCounts = useMemo(() => countByPlace(finds), [finds]);
-  const offMap = useMemo(() => finds.filter((a) => !onMap(a)), [finds]);
+  const findCounts = useMemo(() => countByPlace(visible), [visible]);
+  const offMap = useMemo(() => visible.filter((a) => !onMap(a)), [visible]);
   // An open find that belongs to a place lights up that place's dot.
   const findPlace = selectedFind ? (finds.find((a) => a.slug === selectedFind)?.place_slug ?? null) : null;
   const mapSelected = selectedFind ? findPlace : selected;
@@ -60,7 +67,7 @@ export default function MapPage() {
           <Suspense fallback={<Skeleton height={460} delayMs={0} />}>
             <MapCompare
               places={all} selected={mapSelected} candidates={candidates} onSelect={select}
-              finds={showFinds ? finds : NO_FINDS} selectedFind={selectedFind} onSelectFind={selectFind}
+              finds={showFinds ? visible : NO_FINDS} selectedFind={selectedFind} onSelectFind={selectFind}
             />
           </Suspense>
           <p className="small-note" style={{ marginTop: 10 }}>
@@ -69,7 +76,8 @@ export default function MapPage() {
             have open is the large blue dot.
           </p>
           <FindsSection
-            count={finds.length} offMap={offMap} show={showFinds} onShow={setShowFinds}
+            count={visible.length} offMap={offMap} show={showFinds} onShow={setShowFinds}
+            unreviewed={unreviewedCount} showUnreviewed={showUnreviewed} onShowUnreviewed={setShowUnreviewed}
             pending={artifacts.isPending} error={artifacts.isError} selected={selectedFind} onSelect={selectFind}
           />
         </div>
@@ -87,7 +95,7 @@ export default function MapPage() {
             {selectedFind ? (
               <ArtifactPanel slug={selectedFind} artifacts={finds} pending={artifacts.isPending} onSelect={selectFind} onSelectPlace={select} />
             ) : (
-              <PlacePanel slug={selected} finds={finds} onSelectFind={selectFind} />
+              <PlacePanel slug={selected} finds={visible} onSelectFind={selectFind} />
             )}
           </div>
         </section>
@@ -179,10 +187,12 @@ function PlaceChips({ places, selected, onSelect }: { places: PlaceSummary[]; se
 /** The finds layer: a toggle, a word on what a find can and can't show, and finds with no map point. */
 function FindsSection(props: {
   count: number; offMap: Artifact[]; show: boolean; onShow: (v: boolean) => void;
+  unreviewed: number; showUnreviewed: boolean; onShowUnreviewed: (v: boolean) => void;
   pending: boolean; error: boolean; selected: string | null; onSelect: (slug: string) => void;
 }) {
-  const { count, offMap, show, onShow, pending, error, selected, onSelect } = props;
+  const { count, offMap, show, onShow, unreviewed, showUnreviewed, onShowUnreviewed, pending, error, selected, onSelect } = props;
   const toggleId = useId();
+  const unreviewedId = useId();
   return (
     <section className="card" style={{ marginTop: 16, padding: '16px 20px' }} aria-labelledby={`${toggleId}-h`}>
       <h2 id={`${toggleId}-h`} style={{ margin: 0, fontSize: 20 }}>Archaeological finds</h2>
@@ -197,7 +207,22 @@ function FindsSection(props: {
       {count > 0 && (
         <label htmlFor={toggleId} style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, minHeight: 32, cursor: 'pointer' }}>
           <input id={toggleId} type="checkbox" checked={show} onChange={(e) => onShow(e.target.checked)} style={{ width: 18, height: 18 }} />
-          Show {count === 1 ? 'the find' : `all ${count} finds`} on the map (gold dots and diamonds)
+          Show {count === 1 ? 'the find' : `${count} finds`} on the map (gold dots and diamonds)
+        </label>
+      )}
+      {unreviewed > 0 && (
+        <label htmlFor={unreviewedId} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginTop: 6, cursor: 'pointer' }}>
+          <input
+            id={unreviewedId} type="checkbox" checked={showUnreviewed} onChange={(e) => onShowUnreviewed(e.target.checked)}
+            style={{ width: 18, height: 18, marginTop: 4, flex: 'none' }}
+          />
+          <span>
+            Also show {unreviewed.toLocaleString()} {unreviewed === 1 ? 'find' : 'finds'}{' '}
+            <ScholarDefinition term="authUnreviewed">not yet reviewed</ScholarDefinition>
+            <span className="small-note" style={{ display: 'block' }}>
+              Added automatically from Wikidata. <BeingChecked /> until someone checks each one.
+            </span>
+          </span>
         </label>
       )}
       {offMap.length > 0 && (

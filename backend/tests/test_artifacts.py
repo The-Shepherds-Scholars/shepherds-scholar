@@ -126,6 +126,16 @@ def _fetched():
     return finds, details
 
 
+def test_region_keeps_the_holy_land_and_leaves_out_far_places():
+    assert wd.in_region(31.7781, 35.2354)        # Jerusalem
+    assert wd.in_region(32.5, 34.891667)         # Caesarea
+    assert wd.in_region(34.12, 35.65)            # Byblos
+    assert not wd.in_region(30.13, 31.29)        # Heliopolis, Egypt
+    assert not wd.in_region(32.19, 48.25)        # Susa, Iran
+    assert not wd.in_region(41.89, 12.49)        # Rome
+    assert wd.in_region(None, None)              # no point of its own: its place decides
+
+
 def test_parse_merges_rows_and_reads_photos():
     finds, _ = _fetched()
     assert set(finds) == {"Q900", "Q1073819"}
