@@ -53,8 +53,12 @@ class PlaceDetailOut(PlaceOut):
 
 
 @router.get("", response_model=list[PlaceOut])
-def list_places(featured: bool = Query(default=False), conn: Connection = Depends(get_conn)):
-    return [PlaceOut(**p.__dict__) for p in places.list_places(conn, featured_only=featured)]
+def list_places(
+    featured: bool = Query(default=False), conn: Connection = Depends(get_conn)
+):
+    return [
+        PlaceOut(**p.__dict__) for p in places.list_places(conn, featured_only=featured)
+    ]
 
 
 @router.get("/{slug}", response_model=PlaceDetailOut)
@@ -64,7 +68,11 @@ def get_place(slug: str, conn: Connection = Depends(get_conn)):
     except places.PlaceNotFound:
         raise HTTPException(404, "Place not found")
     return PlaceDetailOut(
-        **{k: v for k, v in p.__dict__.items() if k not in ("candidates", "passages", "events")},
+        **{
+            k: v
+            for k, v in p.__dict__.items()
+            if k not in ("candidates", "passages", "events")
+        },
         candidates=[c.__dict__ for c in p.candidates],
         passages=[x.__dict__ for x in p.passages],
         events=[e.__dict__ for e in p.events],
