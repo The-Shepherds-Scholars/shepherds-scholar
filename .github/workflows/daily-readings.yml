@@ -7,6 +7,11 @@ on:
   schedule:
     - cron: "0 10 * * *"   # 10:00 UTC = 5 a.m. New York in winter, 6 a.m. in summer
   workflow_dispatch:        # "Run workflow" button on the Actions tab
+    inputs:
+      from_date:
+        description: "Also fill in missing days from this date (YYYY-MM-DD), to catch up after an outage. Leave empty for a normal run."
+        required: false
+        default: ""
 
 concurrency:
   group: daily-readings
@@ -36,12 +41,17 @@ jobs:
       - name: Fetch readings
         env:
           NEON_DATABASE_URL: ${{ secrets.NEON_DATABASE_URL }}
+          FROM_DATE: ${{ inputs.from_date }}
         run: |
           if [ -z "$NEON_DATABASE_URL" ]; then
             echo "::error::Add the NEON_DATABASE_URL secret in Settings > Secrets and variables > Actions."
             exit 1
           fi
-          python -m app.jobs.fetch_daily_readings
+          if [ -n "$FROM_DATE" ]; then
+            python -m app.jobs.fetch_daily_readings --from "$FROM_DATE"
+          else
+            python -m app.jobs.fetch_daily_readings
+          fi
 
       - name: Refresh API.Bible passage cache
         if: ${{ always() }}   # run even if the readings step failed

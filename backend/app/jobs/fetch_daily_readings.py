@@ -4,6 +4,9 @@
 
 Fetches today plus readings_days_ahead days, skipping dates already stored,
 so a normal run makes one call (the newest day) and a missed run catches up.
+Past days are only filled in when asked, after an outage:
+
+    python -m app.jobs.fetch_daily_readings --from 2026-11-23
 
 A day is saved only if it has a Gospel. Every Mass has one, so a day without it means the
 source page wasn't read properly. Saving it would lock in the gap, because stored dates are
@@ -32,9 +35,13 @@ class ReadingsReport:
     failed: list[str] = field(default_factory=list)
 
 
-def run(conn: Connection, provider: readings.ReadingsProvider, today: date | None = None) -> ReadingsReport:
+def run(conn: Connection, provider: readings.ReadingsProvider, today: date | None = None,
+        start: date | None = None) -> ReadingsReport:
+    """Fetches from `start` (default: today) through today + readings_days_ahead."""
     today = today or date.today()
-    days = [today + timedelta(days=i) for i in range(get_settings().readings_days_ahead + 1)]
+    first = min(start or today, today)
+    last = today + timedelta(days=get_settings().readings_days_ahead)
+    days = [first + timedelta(days=i) for i in range((last - first).days + 1)]
     report = ReadingsReport()
     for day in readings.dates_missing(conn, days):
         try:
@@ -55,11 +62,18 @@ def run(conn: Connection, provider: readings.ReadingsProvider, today: date | Non
 
 
 def main() -> None:
+    import argparse
+
     from app.core.database import engine
+
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--from", dest="start", type=date.fromisoformat, metavar="YYYY-MM-DD",
+                        help="also fill in missing days from this date, to catch up after an outage")
+    args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO)
     with engine.begin() as conn:
-        report = run(conn, readings.UsccbProvider())
+        report = run(conn, readings.UsccbProvider(), start=args.start)
     log.info("fetched=%s empty=%s failed=%s", report.fetched, report.empty, report.failed)
     if report.failed:
         # Days that worked are already saved; fail the run so the problem is visible on GitHub.

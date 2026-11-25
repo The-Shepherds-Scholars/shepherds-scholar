@@ -37,6 +37,10 @@ class Settings(BaseSettings):
     readings_days_ahead: int = 6
 
     cors_origins: list[str] = ["http://localhost:5173"]
+    # Also allowed: the live site and every Cloudflare preview build of it. Preview builds get a
+    # new address each time (<version>-shepherds-scholar.gjr6906.workers.dev), so they can't be
+    # listed in CORS_ORIGINS one by one. Only this Worker's own addresses match.
+    cors_origin_regex: str = r"https://([a-z0-9-]+-)?shepherds-scholar\.gjr6906\.workers\.dev"
 
 
 @lru_cache

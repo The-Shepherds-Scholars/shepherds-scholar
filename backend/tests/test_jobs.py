@@ -127,6 +127,25 @@ def test_days_without_a_gospel_are_not_saved(conn):
     assert readings.get_for_date(conn, today) == []
 
 
+def test_a_stored_day_without_a_gospel_is_fetched_again_and_replaced(conn):
+    # Thanksgiving 2026 was stored with no readings before the Gospel check existed.
+    today = date(2026, 11, 26)
+    readings.save(conn, readings.DayReadings(today, "default", "Thanksgiving", "https://example.org", [], "fake"))
+    p = FakeProvider()
+    report = fetch_daily_readings.run(conn, p, today)
+    assert today in report.fetched
+    stored = readings.get_for_date(conn, today)
+    assert len(stored) == 1 and [r.section for r in stored[0].readings] == ["First Reading", "Gospel"]
+
+
+def test_from_fills_in_past_days(conn):
+    today = date(2026, 11, 25)
+    p = FakeProvider()
+    report = fetch_daily_readings.run(conn, p, today, start=date(2026, 11, 23))
+    assert report.fetched[:3] == [date(2026, 11, 23), date(2026, 11, 24), today]
+    assert len(report.fetched) == 2 + get_settings().readings_days_ahead + 1
+
+
 def test_refresh_skips_books_the_translation_lacks(conn):
     conn.execute(text("""INSERT INTO bible_translations (code, name, source, api_bible_id, versification, license,
                                                          includes_deuterocanon, citation, citation_short)

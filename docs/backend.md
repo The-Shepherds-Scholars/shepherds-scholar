@@ -67,7 +67,7 @@ with `python -m …` from `backend/`.
 
 | File | What it does | Why |
 |---|---|---|
-| `app/jobs/fetch_daily_readings.py` | Fetches readings for today and the next 6 days, skipping dates already stored. Reads USCCB's November 2026 page layout (every reading in one block) itself, keeping only names and references. Saves a day only if it has a Gospel, and exits with an error if any day failed | A missed day catches up on the next run. USCCB sometimes asks for a browser check, so the workflow installs a headless browser. A day missing its Gospel means the page wasn't read properly; saving it would lock in the gap, since stored dates are never fetched again. Failing the run makes problems show up red on the Actions tab instead of passing quietly |
+| `app/jobs/fetch_daily_readings.py` | Fetches readings for today and the next 6 days, skipping dates already stored. Reads USCCB's November 2026 page layout (every reading in one block) itself, keeping only names and references. Saves a day only if it has a Gospel, treats a stored day without one as missing (so the next run replaces it), and exits with an error if any day failed. `--from YYYY-MM-DD` also fills in past days; the Daily jobs workflow's **Run workflow** button has a box for it | A missed day catches up on the next run. USCCB sometimes asks for a browser check, so the workflow installs a headless browser. A day missing its Gospel means the page wasn't read properly; saving it would lock in the gap, since stored dates are never fetched again. Failing the run makes problems show up red on the Actions tab instead of passing quietly |
 | `app/jobs/refresh_passage_cache.py` | Deletes cached API.Bible text over 30 days old, then fetches passages that are missing or over 25 days old, until the monthly budget runs out. Skips deuterocanonical books for translations that lack them, and the thousands of verses linked to imported places | Follows API.Bible's 30-day rule, and refreshes before the deadline |
 
 The workflow needs the GitHub secret `NEON_DATABASE_URL`. The API.Bible step needs `API_BIBLE_KEY`,
@@ -172,5 +172,8 @@ connected to Neon.
 
 Web service `shepherds-scholar`, free plan, Docker, root directory `backend`, Ohio region. It
 redeploys on every push to `main`. Environment variables: `NEON_DATABASE_URL`, `CORS_ORIGINS` (a
-JSON list that includes the Cloudflare site's address), `API_BIBLE_KEY`. The free plan sleeps after
+JSON list that includes the Cloudflare site's address), `API_BIBLE_KEY`. Cloudflare preview builds
+get a new address each time, like `708800b9-shepherds-scholar.gjr6906.workers.dev`; the API allows
+those by default through `cors_origin_regex` in `app/core/config.py`, so they never need adding to
+`CORS_ORIGINS`. `tests/test_cors.py` checks that look-alike addresses are still refused. The free plan sleeps after
 about 15 idle minutes, so the first request after that takes 30 to 60 seconds.

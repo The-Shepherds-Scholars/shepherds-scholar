@@ -126,15 +126,25 @@ def save(conn: Connection, day: DayReadings) -> None:
     conn.execute(
         text("""INSERT INTO daily_readings (reading_date, mass_type, title, source_url, readings, provider)
                 VALUES (:d, :t, :title, :url, CAST(:readings AS jsonb), :provider)
-                ON CONFLICT (reading_date, mass_type) DO NOTHING"""),
+                ON CONFLICT (reading_date, mass_type) DO UPDATE SET
+                    title = EXCLUDED.title, source_url = EXCLUDED.source_url, readings = EXCLUDED.readings,
+                    provider = EXCLUDED.provider, fetched_at = now()"""),
         {"d": day.reading_date, "t": day.mass_type, "title": day.title, "url": day.source_url,
          "readings": json.dumps([r.__dict__ for r in day.readings]), "provider": day.provider},
     )
 
 
 def dates_missing(conn: Connection, days: list[date]) -> list[date]:
+    """Dates with no stored readings, or stored without a Gospel (a page that wasn't read fully).
+
+    Treating a Gospel-less day as missing lets the next run replace it. Before November 24, 2026
+    such days could be saved, like Thanksgiving 2026, stored with no readings at all.
+    """
     have = {r[0] for r in conn.execute(
-        text("SELECT DISTINCT reading_date FROM daily_readings WHERE reading_date = ANY(:days)"),
+        text("""SELECT DISTINCT reading_date FROM daily_readings
+                WHERE reading_date = ANY(:days)
+                  AND EXISTS (SELECT 1 FROM jsonb_array_elements(readings) r
+                              WHERE r->>'section' ILIKE '%gospel%')"""),
         {"days": days},
     )}
     return [d for d in days if d not in have]

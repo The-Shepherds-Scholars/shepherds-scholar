@@ -121,6 +121,7 @@ The `.env.example` files list every setting with no secret values.
 | `API_BIBLE_BASE_URL` | `backend/.env` | `https://rest.api.bible/v1` |
 | `API_BIBLE_MONTHLY_BUDGET` | `backend/.env` | Most API.Bible calls the jobs may make per month (4500) |
 | `CORS_ORIGINS` | Render | Which websites may call the API, as a JSON list |
+| `CORS_ORIGIN_REGEX` | Render (optional) | A pattern for more websites that may call the API. The default already allows the live site and every Cloudflare preview build of it (`<version>-shepherds-scholar.gjr6906.workers.dev`), whose addresses change with each build |
 | `VITE_API_URL` | `frontend/.env`, Cloudflare build variables | Where the site finds the API |
 | `VITE_FORMSPREE_ID` | `frontend/.env`, Cloudflare build variables | Formspree form ID for the Contact page |
 
