@@ -4,7 +4,14 @@
 
 Fetches today plus readings_days_ahead days, skipping dates already stored,
 so a normal run makes one call (the newest day) and a missed run catches up.
+
+A day is saved only if it has a Gospel. Every Mass has one, so a day without it means the
+source page wasn't read properly. Saving it would lock in the gap, because stored dates are
+never fetched again. If any day fails, the job exits with an error so the Actions run shows
+red instead of quietly succeeding.
 """
+
+import sys
 
 import logging
 from dataclasses import dataclass, field
@@ -38,6 +45,10 @@ def run(conn: Connection, provider: readings.ReadingsProvider, today: date | Non
         if result is None:
             report.empty.append(day)
             continue
+        if not any("gospel" in r.section.lower() for r in result.readings):
+            found = ", ".join(r.section for r in result.readings) or "nothing"
+            report.failed.append(f"{day}: incomplete page, found {found} but no Gospel")
+            continue
         readings.save(conn, result)
         report.fetched.append(day)
     return report
@@ -50,6 +61,11 @@ def main() -> None:
     with engine.begin() as conn:
         report = run(conn, readings.UsccbProvider())
     log.info("fetched=%s empty=%s failed=%s", report.fetched, report.empty, report.failed)
+    if report.failed:
+        # Days that worked are already saved; fail the run so the problem is visible on GitHub.
+        for f in report.failed:
+            print(f"::error::Readings not saved for {f}", file=sys.stderr)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

@@ -67,7 +67,7 @@ with `python -m …` from `backend/`.
 
 | File | What it does | Why |
 |---|---|---|
-| `app/jobs/fetch_daily_readings.py` | Fetches readings for today and the next 6 days, skipping dates already stored | A missed day catches up on the next run. USCCB sometimes asks for a browser check, so the workflow installs a headless browser |
+| `app/jobs/fetch_daily_readings.py` | Fetches readings for today and the next 6 days, skipping dates already stored. Reads USCCB's November 2026 page layout (every reading in one block) itself, keeping only names and references. Saves a day only if it has a Gospel, and exits with an error if any day failed | A missed day catches up on the next run. USCCB sometimes asks for a browser check, so the workflow installs a headless browser. A day missing its Gospel means the page wasn't read properly; saving it would lock in the gap, since stored dates are never fetched again. Failing the run makes problems show up red on the Actions tab instead of passing quietly |
 | `app/jobs/refresh_passage_cache.py` | Deletes cached API.Bible text over 30 days old, then fetches passages that are missing or over 25 days old, until the monthly budget runs out. Skips deuterocanonical books for translations that lack them, and the thousands of verses linked to imported places | Follows API.Bible's 30-day rule, and refreshes before the deadline |
 
 The workflow needs the GitHub secret `NEON_DATABASE_URL`. The API.Bible step needs `API_BIBLE_KEY`,

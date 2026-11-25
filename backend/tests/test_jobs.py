@@ -1,5 +1,6 @@
 import json
 from datetime import date
+from pathlib import Path
 
 import httpx
 from sqlalchemy import text
@@ -110,6 +111,22 @@ def test_readings_fetched_once_per_date(conn):
     assert all(set(x) == {"section", "reference"} for x in raw)  # references only, no text
 
 
+class GospelMissingProvider(FakeProvider):
+    def fetch(self, day):
+        self.calls.append(day)
+        return readings.DayReadings(day, "default", "A day", self.source_url(day),
+                                    [readings.ReadingRef("First Reading", "Revelation 14:14-19")], self.name)
+
+
+def test_days_without_a_gospel_are_not_saved(conn):
+    today = date(2026, 11, 24)
+    report = fetch_daily_readings.run(conn, GospelMissingProvider(), today)
+    assert report.fetched == []
+    assert len(report.failed) == get_settings().readings_days_ahead + 1
+    assert "no Gospel" in report.failed[0]
+    assert readings.get_for_date(conn, today) == []
+
+
 def test_refresh_skips_books_the_translation_lacks(conn):
     conn.execute(text("""INSERT INTO bible_translations (code, name, source, api_bible_id, versification, license,
                                                          includes_deuterocanon, citation, citation_short)
@@ -123,3 +140,16 @@ def test_refresh_skips_books_the_translation_lacks(conn):
     calls = []
     report = refresh_passage_cache.refresh(conn, _client(conn, calls))
     assert report.fetched == 1 and calls == ["/v1/bibles/p-01/verses/JHN.3.16"]
+
+
+def test_usccb_new_layout_reads_every_section():
+    # USCCB's November 2026 layout: all readings in one block. No second reading on a weekday.
+    html = (Path(__file__).parent / "fixtures" / "usccb_2026-11-24.html").read_text()
+    day = readings.parse_usccb_page(html, date(2026, 11, 24), "https://bible.usccb.org/bible/readings/112426.cfm")
+    assert day.title == "Memorial of Saint Andrew Dung-Lac, Priest, and Companions, Martyrs"
+    assert [(r.section, r.reference) for r in day.readings] == [
+        ("First Reading", "Revelation 14:14-19"),
+        ("Responsorial Psalm", "Psalms 96:10, 11-12, 13"),
+        ("Alleluia", "Revelation 2:10c"),
+        ("Gospel", "Luke 21:5-11"),
+    ]
