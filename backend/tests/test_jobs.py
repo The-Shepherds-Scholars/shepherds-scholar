@@ -172,3 +172,47 @@ def test_usccb_new_layout_reads_every_section():
         ("Alleluia", "Revelation 2:10c"),
         ("Gospel", "Luke 21:5-11"),
     ]
+
+
+def _soup(name):
+    from bs4 import BeautifulSoup
+    return BeautifulSoup((Path(__file__).parent / "fixtures" / name).read_text(), "html5lib")
+
+
+def test_usccb_menu_page_lists_each_set_of_readings():
+    # Thanksgiving 2026: the day's page only links to the weekday and Thanksgiving Day readings.
+    assert readings.menu_links(_soup("usccb_2026-11-26_menu.html")) == [
+        "https://bible.usccb.org/bible/readings/112626-Ordinary",
+        "https://bible.usccb.org/bible/readings/112626-Thanksgiving",
+    ]
+    assert readings.mass_type_from_url("https://bible.usccb.org/bible/readings/112626-Thanksgiving") == "thanksgiving"
+    # Normal pages are not menus, even when they link to the day's other pages.
+    assert readings.menu_links(_soup("usccb_2026-11-26_ordinary.html")) == []
+    assert readings.menu_links(_soup("usccb_2026-11-24.html")) == []
+
+
+def test_usccb_linked_page_reads_like_any_other_day():
+    html = (Path(__file__).parent / "fixtures" / "usccb_2026-11-26_ordinary.html").read_text()
+    day = readings.parse_usccb_page(html, date(2026, 11, 26), "https://bible.usccb.org/bible/readings/112626-Ordinary")
+    assert [r.section for r in day.readings] == ["First Reading", "Responsorial Psalm", "Alleluia", "Gospel"]
+    assert day.readings[-1].reference == "Luke 21:20-28"
+
+
+class TwoMassProvider(FakeProvider):
+    def fetch(self, day):
+        self.calls.append(day)
+        return [
+            readings.DayReadings(day, kind, title, self.source_url(day),
+                                 [readings.ReadingRef("First Reading", "Revelation 18:1-2"),
+                                  readings.ReadingRef("Gospel", gospel)], self.name)
+            for kind, title, gospel in [("ordinary", "Thursday", "Luke 21:20-28"),
+                                        ("thanksgiving", "Thanksgiving Day", "Luke 17:11-19")]
+        ]
+
+
+def test_a_day_with_two_sets_replaces_the_empty_row(conn):
+    today = date(2026, 11, 26)
+    readings.save(conn, readings.DayReadings(today, "default", "Thanksgiving", "https://example.org", [], "fake"))
+    report = fetch_daily_readings.run(conn, TwoMassProvider(), today)
+    assert today in report.fetched
+    assert [m.mass_type for m in readings.get_for_date(conn, today)] == ["ordinary", "thanksgiving"]

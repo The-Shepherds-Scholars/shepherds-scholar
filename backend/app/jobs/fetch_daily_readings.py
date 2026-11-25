@@ -49,14 +49,18 @@ def run(conn: Connection, provider: readings.ReadingsProvider, today: date | Non
         except Exception as exc:  # a provider outage must not stop the other days
             report.failed.append(f"{day}: {exc}")
             continue
-        if result is None:
+        masses = [] if result is None else (result if isinstance(result, list) else [result])
+        masses = [m for m in masses if m is not None]
+        if not masses:
             report.empty.append(day)
             continue
-        if not any("gospel" in r.section.lower() for r in result.readings):
-            found = ", ".join(r.section for r in result.readings) or "nothing"
+        missing = [m for m in masses if not any("gospel" in r.section.lower() for r in m.readings)]
+        if missing:
+            found = "; ".join(f"{m.mass_type}: " + (", ".join(r.section for r in m.readings) or "nothing")
+                              for m in missing)
             report.failed.append(f"{day}: incomplete page, found {found} but no Gospel")
             continue
-        readings.save(conn, result)
+        readings.replace_day(conn, day, masses)
         report.fetched.append(day)
     return report
 
